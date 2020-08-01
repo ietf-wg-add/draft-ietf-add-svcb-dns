@@ -63,7 +63,7 @@ This key is automatically mandatory if present.
 
 These keys indicate the set of supported protocols.  The default protocol is "dot", indicating support for DNS over TLS {{!DOT=RFC7858}}.
 
-If the protocol set contains any HTTP versions (e.g. "http/1.1", "h2", "h3"), then the record indicates support for DNS over HTTPS {{!DOH=RFC8484}}, and the "dohpath" key MUST be present.  All keys specified for use with the HTTPS record are also permissible, and apply to the resulting HTTP connection.
+If the protocol set contains any HTTP versions (e.g. "h2", "h3"), then the record indicates support for DNS over HTTPS {{!DOH=RFC8484}}, and the "dohpath" key MUST be present.  All keys specified for use with the HTTPS record are also permissible, and apply to the resulting HTTP connection.
 
 If the protocol set contains protocols with different default ports, and no port key is specified, then protocols are contacted separately on their default ports.  Note that in this configuration, ALPN negotiation does not defend against cross-protocol downgrade attacks.
 
@@ -94,7 +94,7 @@ DNS URIs convey limited information to the client.  For example, they do not ind
 
         $ORIGIN example.
         _dns.resolver 7200 IN SVCB 1 resolver (
-          alpn=http/1.1,h2,h3 echconfig=... dohpath=/dns-query{?dns} )
+          alpn=h2,h3 echconfig=... dohpath=/dns-query{?dns} )
         _dns.resolver 7200 IN SVCB 2 resolver (
           port=8530 echconfig=... )
         _dns.resolver 7200 IN SVCB 3 fooexp.resolver ( port=5353
