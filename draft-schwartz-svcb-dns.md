@@ -113,7 +113,17 @@ A client that attempts a connection using an encrypted DNS transport from a SVCB
 
 # IANA Considerations
 
-IANA would be directed to register the "dohpath" key in the SVCB Service Parameters registry.
+Per {{SVCB}} IANA would be directed to add the following entry to the SVCB Service Parameters registry.
+
+| Number  | Name    | Meaning                      | Reference       |
+| ------- | ------- | ---------------------------- | --------------- |
+| TBD     | dohpath | DNS over HTTPS path template | (This document) |
+
+Per {{?Attrleaf=RFC8552}}, IANA would be directed to add the following entry to the DNS Underscore Global Scoped Entry Registry:
+
+| RR TYPE | _NODE NAME | Meaning       | Reference       |
+| ------- | ---------- | ------------- | --------------- |
+| SVCB    | _dns       | DNS SVCB info | (This document) |
 
 
 --- back
