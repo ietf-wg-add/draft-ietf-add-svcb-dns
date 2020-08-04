@@ -36,7 +36,7 @@ The SVCB DNS record type expresses a bound collection of endpoint metadata, for 
 
 The SVCB record type {{!SVCB=I-D.draft-ietf-dnsop-svcb-https-01}} provides clients with information about how to reach alternative endpoints for a service, which may have improved performance or privacy properties.  The service is typically identified by a URI containing a scheme and an authority (a hostname and optionally a port).
 
-The `dns:` URI scheme {{!DNSURI=RFC4501}} describes a way to represent DNS queries as URIs.  This scheme optionally includes an authority, comprised of a host and port number (with a default of 53).  DNS URIs often omit the authority, or specify an IP address, but a hostname is also a supported authority.
+The `dns:` URI scheme {{!DNSURI=RFC4501}} describes a way to represent DNS queries as URIs.  This scheme optionally includes an authority, comprised of a host and port number (with a default of 53).  DNS URIs often omit the authority, or specify an IP address, but a hostname is allowed.
 
 Use of the SVCB record type with a URI scheme requires a mapping document, indicating how a client for that scheme can interpret the contents of the SVCB SvcParams.  This document provides the mapping for DNS URIs that contain a hostname authority, allowing the server to offer alternative endpoints and transports, including encrypted transports like DNS over TLS and DNS over HTTPS.
 
