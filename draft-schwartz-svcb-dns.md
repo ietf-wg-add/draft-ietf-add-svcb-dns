@@ -6,7 +6,7 @@ category: info
 
 ipr: trust200902
 area: General
-workgroup: dnsop
+workgroup: add
 keyword: Internet-Draft
 
 stand_alone: yes
