@@ -72,6 +72,7 @@ These keys are automatically mandatory if present.
 ## Other applicable SvcParamKeys
 
 These SvcParamKeys are applicable to the "dns" scheme with their standard meaning and behavior:
+
 * echconfig
 * ipv4hint
 * ipv6hint
@@ -86,7 +87,7 @@ Clients SHOULD NOT query for any "HTTPS" RRs when using the constructed URI Temp
 
 # Limitations
 
-DNS URIs convey limited information to the client.  For example, they do not indicate whether the query should include the "recursion desired", "DNSSEC OK", or "checking disabled" flags.  Clients must know the appropriate values for these flags in their use case.  Similarly, nothing in the DNS URI or in this document indicates the set of names for which the server is willing to answer queries.
+DNS URIs convey limited information to the client.  For example, they do not indicate whether the query should include the "recursion desired", "DNSSEC OK", or "checking disabled" flags.  Clients must know the appropriate values for these flags in their use case.  Similarly, nothing in this document indicates the set of names for which the server is willing or able to answer queries.
 
 # Examples
 
@@ -110,17 +111,21 @@ DNS URIs convey limited information to the client.  For example, they do not ind
 
 # Security Considerations
 
-## Adversaries who control the DNS responses
+## Adversary on the query path
+
+This section considers an adversary who can add or remove responses to the SVCB query.
 
 Clients MUST authenticate the server to its name during secure transport establishment.  This name is the hostname present in the DNS URI, and cannot be influenced by the SVCB record contents.  Accordingly, this draft does not mandate the use of DNSSEC.  This draft also does not specify how clients authenticate the name (e.g. selection of roots of trust), which might vary according to the context.
 
-Although a DNS intermediary attacker cannot alter the authentication name of the server, this attacker does have control of the port number and "dohpath" value.  As a result, this attacker can direct DNS queries for "dns://$HOSTNAME" to any port on $HOSTNAME, and any path on "https://$HOSTNAME", even if $HOSTNAME does not actually provide DNS over HTTPS or DNS over TLS.  If the DNS client shares authentication state with a TLS or HTTP client, it's possible that the client will be correctly authenticated (e.g. using a TLS client certificate or HTTP cookie).
+Although this adversary cannot alter the authentication name of the server, it does have control of the port number and "dohpath" value.  As a result, the adversary can direct DNS queries for "dns://$HOSTNAME" to any port on $HOSTNAME, and any path on "https://$HOSTNAME", even if $HOSTNAME is not actually a DNS server.  If the DNS client uses shared TLS or HTTP state, the client could be correctly authenticated (e.g. using a TLS client certificate or HTTP cookie).
 
-This behavior creates a number of possible attacks for certain server configurations.  For example, if "https://$HOSTNAME/upload" accepts arbitrary POST requests as file uploads, an attacker could forge a SVCB record containing `dohpath=/upload`, potentially causing the client to generate a large number of uploads, incurring unexpected costs for the server operator or the client's account.
+This behavior creates a number of possible attacks for certain server configurations.  For example, if "https://$HOSTNAME/upload" accepts any POST request as a file upload, the adversary could forge a SVCB record containing `dohpath=/upload`, causing the client to upload every query, resulting in unexpected storage costs.
 
-As a mitigation, a client of this SVCB mapping MUST NOT provide client authentication for DNS queries, except to servers that it specifically knows are not vulnerable to such attacks.
+As a mitigation, a client of this SVCB mapping MUST NOT provide client authentication for DNS queries, except to servers that it specifically knows are not vulnerable to such attacks.  Also, if an alternative service endpoint sends an invalid response to a DNS query, the client SHOULD NOT send more queries to that endpoint.
 
-## Adversaries who control non-DNS network activity
+## Adversary on the transport path
+
+This section considers an adversary who can modify network traffic between the client and the SvcDomainName (i.e. the destination server).
 
 A client that attempts a connection using an encrypted DNS transport from a SVCB record SHOULD NOT fall back to unencrypted DNS if connection fails.  (This is different from the advice in Section 3 of {{SVCB}}, which assumes the default transport is secured.)  Specifications making using of this mapping MAY adjust this fallback behavior to suit their requirements.
 
