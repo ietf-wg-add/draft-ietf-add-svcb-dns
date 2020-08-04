@@ -2,7 +2,7 @@
 title: "Service Binding Mapping for DNS URIs"
 abbrev: "SVCB for dns://"
 docname: draft-schwartz-svcb-dns-latest
-category: info
+category: std
 
 ipr: trust200902
 area: General
