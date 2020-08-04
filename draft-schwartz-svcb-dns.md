@@ -28,13 +28,13 @@ informative:
 
 --- abstract
 
-The SVCB DNS record type expresses a bound collection of endpoint metadata, for use when establishing a connection to a named service.  DNS itself can be such a service, when the server is identified by a hostname in a `dns:` URI.  This document provides the SVCB mapping for named DNS servers, allowing DNS servers to indicate support for new transport protocols.
+The SVCB DNS record type expresses a bound collection of endpoint metadata, for use when establishing a connection to a named service.  DNS itself can be such a service, when the server is identified by a hostname in a `dns:` URI.  This document provides the SVCB mapping for name-based DNS URIs, allowing DNS servers to indicate support for new transport protocols.
 
 --- middle
 
 # Introduction
 
-The SVCB record type {{!SVCB=I-D.draft-ietf-dnsop-svcb-https-01}} provides clients with information about how to reach alternative endpoints for a service, which may have improved performance or privacy properties.  The service is typically identified by its authority (a hostname and optionally a port) and scheme (typically a URI scheme).
+The SVCB record type {{!SVCB=I-D.draft-ietf-dnsop-svcb-https-01}} provides clients with information about how to reach alternative endpoints for a service, which may have improved performance or privacy properties.  The service is typically identified by a URI containing a scheme and an authority (a hostname and optionally a port).
 
 The `dns:` URI scheme {{!DNSURI=RFC4501}} describes a way to represent DNS queries as URIs.  This scheme optionally includes an authority, comprised of a host and port number (with a default of 53).  DNS URIs often omit the authority, or specify an IP address, but a hostname is also a supported authority.
 
@@ -63,7 +63,7 @@ This key is automatically mandatory if present.
 
 These keys indicate the set of supported protocols.  The default protocol is "dot", indicating support for DNS over TLS {{!DOT=RFC7858}}.
 
-If the protocol set contains any HTTP versions (e.g. "h2", "h3"), then the record indicates support for DNS over HTTPS {{!DOH=RFC8484}}, and the "dohpath" key MUST be present.  All keys specified for use with the HTTPS record are also permissible, and apply to the resulting HTTP connection.
+If the protocol set contains any HTTP versions (e.g. "h2", "h3"), then the record indicates support for DNS over HTTPS {{!DOH=RFC8484}}, and the "dohpath" key MUST be present ({{dohpath}}).  All keys specified for use with the HTTPS record are also permissible, and apply to the resulting HTTP connection.
 
 If the protocol set contains protocols with different default ports, and no port key is specified, then protocols are contacted separately on their default ports.  Note that in this configuration, ALPN negotiation does not defend against cross-protocol downgrade attacks.
 
@@ -78,9 +78,9 @@ These SvcParamKeys are applicable to the "dns" scheme with their standard meanin
 
 # New SvcParamKeys
 
-## dohpath
+## dohpath {#dohpath}
 
-"dohpath" is a single-valued SvcParamKey whose value (both in presentation and wire format) is a relative URI Template {{!RFC6570}}, normally starting with "/".  If the "alpn" SvcParamKey indicates support for HTTP, clients MAY construct a DNS over HTTPS URI Template by combining the prefix "https://", the authority hostname from the `dns://` URI, the port from the "port" key if present, and the dohpath value.  (The port from the `dns://` URI MUST NOT be used.)
+"dohpath" is a single-valued SvcParamKey whose value (both in presentation and wire format) is a relative URI Template {{!RFC6570}}, normally starting with "/".  If the "alpn" SvcParamKey indicates support for HTTP, clients MAY construct a DNS over HTTPS URI Template by combining the prefix "https://", the authority hostname from the `dns://` URI, the port from the "port" key if present, and the "dohpath" value.  (The port from the `dns://` URI MUST NOT be used.)
 
 Clients SHOULD NOT query for any "HTTPS" RRs when using the constructed URI Template.  Instead, the SvcParams and address records associated with this SVCB record SHOULD be used for the HTTPS connection, with the same semantics as an HTTPS RR.  However, for consistency, server operators SHOULD publish an equivalent HTTPS RR, especially if clients might learn this URI Template through a different channel.
 
@@ -118,7 +118,7 @@ Although a DNS intermediary attacker cannot alter the authentication name of the
 
 This behavior creates a number of possible attacks for certain server configurations.  For example, if "https://$HOSTNAME/upload" accepts arbitrary POST requests as file uploads, an attacker could forge a SVCB record containing `dohpath=/upload`, potentially causing the client to generate a large number of uploads, incurring unexpected costs for the server operator or the client's account.
 
-As a mitigation, a client of this SVCB mapping MUST NOT provide client authentication for DNS queries, except to servers that it specifically knows are not vulnerable to this attack.
+As a mitigation, a client of this SVCB mapping MUST NOT provide client authentication for DNS queries, except to servers that it specifically knows are not vulnerable to such attacks.
 
 ## Adversaries who control non-DNS network activity
 
