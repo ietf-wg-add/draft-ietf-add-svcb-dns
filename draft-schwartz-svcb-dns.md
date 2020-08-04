@@ -69,15 +69,18 @@ If the protocol set contains protocols with different default ports, and no port
 
 These keys are automatically mandatory if present.
 
-## echconfig
+## Other applicable SvcParamKeys
 
-The echconfig SvcParamKey, if present, applies to any ECH-capable connection that uses this record.
+These SvcParamKeys are applicable to the "dns" scheme with their standard meaning and behavior:
+* echconfig
+* ipv4hint
+* ipv6hint
 
 # New SvcParamKeys
 
 ## dohpath
 
-"dohpath" is a single-valued SvcParamKey whose value (both in presentation and wire format) is a relative URI Template {{!RFC6570}}, normally starting with `/`.  If the "alpn" SvcParamKey indicates support for HTTP, clients MAY construct a DNS over HTTPS URI Template by combining the prefix "https://", the authority hostname from the `dns://` URI, the port from the "port" key if present, and the dohpath value.  (The port from the `dns://` URI MUST NOT be used.)
+"dohpath" is a single-valued SvcParamKey whose value (both in presentation and wire format) is a relative URI Template {{!RFC6570}}, normally starting with "/".  If the "alpn" SvcParamKey indicates support for HTTP, clients MAY construct a DNS over HTTPS URI Template by combining the prefix "https://", the authority hostname from the `dns://` URI, the port from the "port" key if present, and the dohpath value.  (The port from the `dns://` URI MUST NOT be used.)
 
 Clients SHOULD NOT query for any "HTTPS" RRs when using the constructed URI Template.  Instead, the SvcParams and address records associated with this SVCB record SHOULD be used for the HTTPS connection, with the same semantics as an HTTPS RR.  However, for consistency, server operators SHOULD publish an equivalent HTTPS RR, especially if clients might learn this URI Template through a different channel.
 
@@ -107,7 +110,17 @@ DNS URIs convey limited information to the client.  For example, they do not ind
 
 # Security Considerations
 
+## Adversaries who control the DNS responses
+
 Clients MUST authenticate the server to its name during secure transport establishment.  This name is the hostname present in the DNS URI, and cannot be influenced by the SVCB record contents.  Accordingly, this draft does not mandate the use of DNSSEC.  This draft also does not specify how clients authenticate the name (e.g. selection of roots of trust), which might vary according to the context.
+
+Although a DNS intermediary attacker cannot alter the authentication name of the server, this attacker does have control of the port number and "dohpath" value.  As a result, this attacker can direct DNS queries for "dns://$HOSTNAME" to any port on $HOSTNAME, and any path on "https://$HOSTNAME", even if $HOSTNAME does not actually provide DNS over HTTPS or DNS over TLS.  If the DNS client shares authentication state with a TLS or HTTP client, it's possible that the client will be correctly authenticated (e.g. using a TLS client certificate or HTTP cookie).
+
+This behavior creates a number of possible attacks for certain server configurations.  For example, if "https://$HOSTNAME/upload" accepts arbitrary POST requests as file uploads, an attacker could forge a SVCB record containing `dohpath=/upload`, potentially causing the client to generate a large number of uploads, incurring unexpected costs for the server operator or the client's account.
+
+As a mitigation, a client of this SVCB mapping MUST NOT provide client authentication for DNS queries, except to servers that it specifically knows are not vulnerable to this attack.
+
+## Adversaries who control non-DNS network activity
 
 A client that attempts a connection using an encrypted DNS transport from a SVCB record SHOULD NOT fall back to unencrypted DNS if connection fails.  (This is different from the advice in Section 3 of {{SVCB}}, which assumes the default transport is secured.)  Specifications making using of this mapping MAY adjust this fallback behavior to suit their requirements.
 
