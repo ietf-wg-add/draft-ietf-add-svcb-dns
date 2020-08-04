@@ -71,7 +71,7 @@ These keys are automatically mandatory if present.
 
 ## Other applicable SvcParamKeys
 
-These SvcParamKeys are applicable to the "dns" scheme with their standard meaning and behavior:
+These SvcParamKeys apply to the "dns" scheme without modification:
 
 * echconfig
 * ipv4hint
@@ -94,7 +94,7 @@ DNS URIs convey limited information to the client.  For example, they do not ind
 * A resolver at `dns://resolver.example` that supports
   * DNS over TLS on `resolver.example`, port 853 and 8530, with `resolver.example` as the Authentication Domain Name,
   * DNS over HTTPS at `https://resolver.example/dns-query{?dns}`, and
-  * an experimental protocol on a different endpoint:
+  * an experimental protocol on `fooexp.resolver.example:5353`:
 
         $ORIGIN example.
         _dns.resolver 7200 IN SVCB 1 resolver (
