@@ -1,6 +1,6 @@
 ---
-title: "Service Binding Mapping for DNS URIs"
-abbrev: "SVCB for dns://"
+title: "Service Binding Mapping for DNS Servers"
+abbrev: "SVCB for DNS"
 docname: draft-schwartz-svcb-dns-latest
 category: std
 
@@ -28,17 +28,15 @@ informative:
 
 --- abstract
 
-The SVCB DNS record type expresses a bound collection of endpoint metadata, for use when establishing a connection to a named service.  DNS itself can be such a service, when the server is identified by a hostname in a `dns:` URI.  This document provides the SVCB mapping for name-based DNS URIs, allowing DNS servers to indicate support for new transport protocols.
+The SVCB DNS record type expresses a bound collection of endpoint metadata, for use when establishing a connection to a named service.  DNS itself can be such a service, when the server is identified by a domain name.  This document provides the SVCB mapping for named DNS servers, allowing them to indicate support for new transport protocols.
 
 --- middle
 
 # Introduction
 
-The SVCB record type {{!SVCB=I-D.draft-ietf-dnsop-svcb-https-01}} provides clients with information about how to reach alternative endpoints for a service, which may have improved performance or privacy properties.  The service is typically identified by a URI containing a scheme and an authority (a hostname and optionally a port).
+The SVCB record type {{!SVCB=I-D.draft-ietf-dnsop-svcb-https-01}} provides clients with information about how to reach alternative endpoints for a service, which may have improved performance or privacy properties.  The service is identified by a "scheme" indicating the service type, a hostname, and optionally other information such as a port number.  A DNS server is often identified only by its IP address (e.g. in DHCP), but in some contexts it can also be identified by a hostname (e.g. "NS" records, manual resolver configuration).
 
-The `dns:` URI scheme {{!DNSURI=RFC4501}} describes a way to represent DNS queries as URIs.  This scheme optionally includes an authority, comprised of a host and port number (with a default of 53).  DNS URIs often omit the authority, or specify an IP address, but a hostname is allowed.
-
-Use of the SVCB record type with a URI scheme requires a mapping document, indicating how a client for that scheme can interpret the contents of the SVCB SvcParams.  This document provides the mapping for DNS URIs that contain a hostname authority, allowing the server to offer alternative endpoints and transports, including encrypted transports like DNS over TLS and DNS over HTTPS.
+Use of the SVCB record type requires a mapping document for each service type, indicating how a client for that service can interpret the contents of the SVCB SvcParams.  This document provides the mapping for the "dns" service type, allowing DNS servers to offer alternative endpoints and transports, including encrypted transports like DNS over TLS and DNS over HTTPS.
 
 # Conventions and Definitions
 
@@ -49,7 +47,7 @@ when, and only when, they appear in all capitals, as shown here.
 
 # Name form
 
-Names are formed using Port-Prefix Naming ({{SVCB}} Section 2.3).  For example, `dns://dns1.example.com:5353` would be converted to the domain `_5353._dns.dns1.example.com.`.
+Names are formed using Port-Prefix Naming ({{SVCB}} Section 2.3).  For example, a DNS server with the name "dns1.example.com", listening (unusually) on non-default port number 5353, would be represented as `_5353._dns.dns1.example.com.`.
 
 # Applicable existing SvcParamKeys
 
@@ -81,17 +79,21 @@ These SvcParamKeys apply to the "dns" scheme without modification:
 
 ## dohpath {#dohpath}
 
-"dohpath" is a single-valued SvcParamKey whose value (both in presentation and wire format) is a relative URI Template {{!RFC6570}}, normally starting with "/".  If the "alpn" SvcParamKey indicates support for HTTP, clients MAY construct a DNS over HTTPS URI Template by combining the prefix "https://", the authority hostname from the `dns://` URI, the port from the "port" key if present, and the "dohpath" value.  (The port from the `dns://` URI MUST NOT be used.)
+"dohpath" is a single-valued SvcParamKey whose value (both in presentation and wire format) is a relative URI Template {{!RFC6570}}, normally starting with "/".  If the "alpn" SvcParamKey indicates support for HTTP, clients MAY construct a DNS over HTTPS URI Template by combining the prefix "https://", the server's hostname, the port from the "port" key if present, and the "dohpath" value.  (The server's original port number MUST NOT be used.)
 
 Clients SHOULD NOT query for any "HTTPS" RRs when using the constructed URI Template.  Instead, the SvcParams and address records associated with this SVCB record SHOULD be used for the HTTPS connection, with the same semantics as an HTTPS RR.  However, for consistency, server operators SHOULD publish an equivalent HTTPS RR, especially if clients might learn this URI Template through a different channel.
 
 # Limitations
 
-DNS URIs convey limited information to the client.  For example, they do not indicate whether the query should include the "recursion desired", "DNSSEC OK", or "checking disabled" flags.  Clients must know the appropriate values for these flags in their use case.  Similarly, nothing in this document indicates the set of names for which the server is willing or able to answer queries.
+This document is concerned exclusively with the DNS transport, and does not affect or inform the construction or interpretation of DNS messages.  For example, nothing in this document indicates whether the server is intended for use as a recursive or authoritative DNS server.  Clients must know the intended use in their context.
+
+# Relationship to DNS URIs
+
+The `dns:` URI scheme {{?DNSURI=RFC4501}} describes a way to represent DNS queries as URIs.  This scheme optionally includes an authority, comprised of a host and port number (with a default of 53).  DNS URIs normally omit the authority, or specify an IP address, but a hostname is allowed, in which case it is suitable for use with this mapping.
 
 # Examples
 
-* A resolver at `dns://resolver.example` that supports
+* A resolver at `resolver.example` that supports
   * DNS over TLS on `resolver.example`, port 853 and 8530, with `resolver.example` as the Authentication Domain Name,
   * DNS over HTTPS at `https://resolver.example/dns-query{?dns}`, and
   * an experimental protocol on `fooexp.resolver.example:5353`:
@@ -104,7 +106,7 @@ DNS URIs convey limited information to the client.  For example, they do not ind
         _dns.resolver 7200 IN SVCB 3 fooexp.resolver ( port=5353
           echconfig=... alpn=foo no-default-alpn foo-info=... )
 
-* A nameserver at `dns://ns.example` whose service configuration is published on a different domain:
+* A nameserver at `ns.example` whose service configuration is published on a different domain:
 
       $ORIGIN example.
       _dns.ns 7200 IN SVCB 0 _dns.ns.nic
@@ -115,9 +117,9 @@ DNS URIs convey limited information to the client.  For example, they do not ind
 
 This section considers an adversary who can add or remove responses to the SVCB query.
 
-Clients MUST authenticate the server to its name during secure transport establishment.  This name is the hostname present in the DNS URI, and cannot be influenced by the SVCB record contents.  Accordingly, this draft does not mandate the use of DNSSEC.  This draft also does not specify how clients authenticate the name (e.g. selection of roots of trust), which might vary according to the context.
+Clients MUST authenticate the server to its name during secure transport establishment.  This name is the hostname used to construct the original SVCB query, and cannot be influenced by the SVCB record contents.  Accordingly, this draft does not mandate the use of DNSSEC.  This draft also does not specify how clients authenticate the name (e.g. selection of roots of trust), which might vary according to the context.
 
-Although this adversary cannot alter the authentication name of the server, it does have control of the port number and "dohpath" value.  As a result, the adversary can direct DNS queries for "dns://$HOSTNAME" to any port on $HOSTNAME, and any path on "https://$HOSTNAME", even if $HOSTNAME is not actually a DNS server.  If the DNS client uses shared TLS or HTTP state, the client could be correctly authenticated (e.g. using a TLS client certificate or HTTP cookie).
+Although this adversary cannot alter the authentication name of the server, it does have control of the port number and "dohpath" value.  As a result, the adversary can direct DNS queries for $HOSTNAME to any port on $HOSTNAME, and any path on "https://$HOSTNAME", even if $HOSTNAME is not actually a DNS server.  If the DNS client uses shared TLS or HTTP state, the client could be correctly authenticated (e.g. using a TLS client certificate or HTTP cookie).
 
 This behavior creates a number of possible attacks for certain server configurations.  For example, if "https://$HOSTNAME/upload" accepts any POST request as a file upload, the adversary could forge a SVCB record containing `dohpath=/upload`, causing the client to upload every query, resulting in unexpected storage costs.
 
