@@ -34,7 +34,7 @@ The SVCB DNS record type expresses a bound collection of endpoint metadata, for 
 
 # Introduction
 
-The SVCB record type {{!SVCB=I-D.draft-ietf-dnsop-svcb-https-01}} provides clients with information about how to reach alternative endpoints for a service, which may have improved performance or privacy properties.  The service is identified by a "scheme" indicating the service type, a hostname, and optionally other information such as a port number.  A DNS server is often identified only by its IP address (e.g. in DHCP), but in some contexts it can also be identified by a hostname (e.g. "NS" records, manual resolver configuration).
+The SVCB record type {{!SVCB=I-D.draft-ietf-dnsop-svcb-https-02}} provides clients with information about how to reach alternative endpoints for a service, which may have improved performance or privacy properties.  The service is identified by a "scheme" indicating the service type, a hostname, and optionally other information such as a port number.  A DNS server is often identified only by its IP address (e.g. in DHCP), but in some contexts it can also be identified by a hostname (e.g. "NS" records, manual resolver configuration).
 
 Use of the SVCB record type requires a mapping document for each service type, indicating how a client for that service can interpret the contents of the SVCB SvcParams.  This document provides the mapping for the "dns" service type, allowing DNS servers to offer alternative endpoints and transports, including encrypted transports like DNS over TLS and DNS over HTTPS.
 
@@ -55,7 +55,7 @@ Names are formed using Port-Prefix Naming ({{SVCB}} Section 2.3).  For example, 
 
 This key is used to indicate the target port for connection.  If omitted, the client SHALL use the default port for each transport protocol: 853 for DNS over TLS and 443 for DNS over HTTPS.
 
-This key is automatically mandatory if present.
+This key is automatically mandatory if present.  (See Section 7 of {{SVCB}} for the definition of "automatically mandatory".)
 
 ## alpn and no-default-alpn
 
