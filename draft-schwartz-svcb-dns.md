@@ -121,9 +121,9 @@ Clients MUST authenticate the server to its name during secure transport establi
 
 Although this adversary cannot alter the authentication name of the server, it does have control of the port number and "dohpath" value.  As a result, the adversary can direct DNS queries for $HOSTNAME to any port on $HOSTNAME, and any path on "https://$HOSTNAME", even if $HOSTNAME is not actually a DNS server.  If the DNS client uses shared TLS or HTTP state, the client could be correctly authenticated (e.g. using a TLS client certificate or HTTP cookie).
 
-This behavior creates a number of possible attacks for certain server configurations.  For example, if "https://$HOSTNAME/upload" accepts any POST request as a file upload, the adversary could forge a SVCB record containing `dohpath=/upload`, causing the client to upload every query, resulting in unexpected storage costs.
+This behavior creates a number of possible attacks for certain server configurations.  For example, if "https://$HOSTNAME/upload" accepts any POST request as a public file upload, the adversary could forge a SVCB record containing `dohpath=/upload`.  This would cause the client to upload and publish every query, resulting in unexpected storage costs for the server and privacy loss for the client.
 
-As a mitigation, a client of this SVCB mapping MUST NOT provide client authentication for DNS queries, except to servers that it specifically knows are not vulnerable to such attacks.  Also, if an alternative service endpoint sends an invalid response to a DNS query, the client SHOULD NOT send more queries to that endpoint.
+To mitigate this attack, a client of this SVCB mapping MUST NOT provide client authentication for DNS queries, except to servers that it specifically knows are not vulnerable to such attacks, and a DoH service operator MUST ensure that all unauthenticated DoH requests to its origin maintain the DoH service's privacy guarantees, regardless of the path.  Also, if an alternative service endpoint sends an invalid response to a DNS query, the client SHOULD NOT send more queries to that endpoint.
 
 ## Adversary on the transport path
 
