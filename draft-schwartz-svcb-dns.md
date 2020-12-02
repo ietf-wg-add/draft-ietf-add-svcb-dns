@@ -53,7 +53,7 @@ Names are formed using Port-Prefix Naming ({{SVCB}} Section 2.3).  For example, 
 
 ## alpn and no-default-alpn
 
-These keys indicate the set of supported protocols.  The default protocol is "dot", indicating support for DNS over TLS {{!DOT=RFC7858}}.
+These keys indicate the set of supported protocols ({{SVCB}} Section 6.1).  The default protocol is "dot", indicating support for DNS over TLS {{!DOT=RFC7858}}.
 
 If the protocol set contains any HTTP versions (e.g. "h2", "h3"), then the record indicates support for DNS over HTTPS {{!DOH=RFC8484}}, and the "dohpath" key MUST be present ({{dohpath}}).  All keys specified for use with the HTTPS record are also permissible, and apply to the resulting HTTP connection.
 
@@ -63,7 +63,7 @@ These keys are automatically mandatory if present.  (See Section 7 of {{SVCB}} f
 
 ## port
 
-This key is used to indicate the target port for connection.  If omitted, the client SHALL use the default port for each transport protocol (853 for DNS over TLS, 443 for DNS over HTTPS).
+This key is used to indicate the target port for connection (({{SVCB}} Section 6.2)).  If omitted, the client SHALL use the default port for each transport protocol (853 for DNS over TLS, 443 for DNS over HTTPS).
 
 This key is automatically mandatory if present.
 
