@@ -51,12 +51,6 @@ Names are formed using Port-Prefix Naming ({{SVCB}} Section 2.3).  For example, 
 
 # Applicable existing SvcParamKeys
 
-## port
-
-This key is used to indicate the target port for connection.  If omitted, the client SHALL use the default port for each transport protocol: 853 for DNS over TLS and 443 for DNS over HTTPS.
-
-This key is automatically mandatory if present.  (See Section 7 of {{SVCB}} for the definition of "automatically mandatory".)
-
 ## alpn and no-default-alpn
 
 These keys indicate the set of supported protocols.  The default protocol is "dot", indicating support for DNS over TLS {{!DOT=RFC7858}}.
@@ -65,7 +59,13 @@ If the protocol set contains any HTTP versions (e.g. "h2", "h3"), then the recor
 
 If the protocol set contains protocols with different default ports, and no port key is specified, then protocols are contacted separately on their default ports.  Note that in this configuration, ALPN negotiation does not defend against cross-protocol downgrade attacks.
 
-These keys are automatically mandatory if present.
+These keys are automatically mandatory if present.  (See Section 7 of {{SVCB}} for the definition of "automatically mandatory".)
+
+## port
+
+This key is used to indicate the target port for connection.  If omitted, the client SHALL use the default port for each transport protocol (853 for DNS over TLS, 443 for DNS over HTTPS).
+
+This key is automatically mandatory if present.
 
 ## Other applicable SvcParamKeys
 
