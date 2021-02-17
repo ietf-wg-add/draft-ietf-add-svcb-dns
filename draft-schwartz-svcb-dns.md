@@ -148,6 +148,21 @@ Per {{?Attrleaf=RFC8552}}, IANA would be directed to add the following entry to 
 
 --- back
 
+# Mapping Summary
+
+This table serves as a non-normative summary of the DNS mapping for SVCB.
+
+|                                  |                                        |
+| -------------------------------- | -------------------------------------- |
+| **Mapped scheme**                | "dns"                                  |
+| **RR type**                      | SVCB (64)                              |
+| **Name prefix**                  | `_dns` for port 53, else `_$PORT._dns` |
+| **Automatically Mandatory Keys** | `port`, `no-default-alpn`              |
+| **SvcParam defaults**            | `alpn`: \["dot"\]                      |
+| **Special behaviors**            | Inherits all HTTPS RR SvcParamKeys     |
+|                                  | Overrides the HTTPS RR for DoH         |
+|                                  | Default port is per-transport          |
+
 # Acknowledgments
 {:numbered="false"}
 
