@@ -129,7 +129,7 @@ To mitigate this attack, a client of this SVCB mapping MUST NOT provide client a
 
 This section considers an adversary who can modify network traffic between the client and the SvcDomainName (i.e. the destination server).
 
-A client that attempts a connection using an encrypted DNS transport from a SVCB record SHOULD NOT fall back to unencrypted DNS if connection fails.  (This is different from the advice in Section 3 of {{SVCB}}, which assumes the default transport is secured.)  Specifications making using of this mapping MAY adjust this fallback behavior to suit their requirements.
+For a SVCB-reliant client ({{SVCB}} Section 3), this adversary can only cause a denial of service.  However, because DNS is unencrypted by default, this adversary can execute a downgrade attack against SVCB-optional clients.  Accordingly, when use of this specification is optional, clients SHOULD switch to SVCB-reliant behavior if SVCB resolution succeeds.  Specifications making using of this mapping MAY adjust this fallback behavior to suit their requirements.
 
 # IANA Considerations
 
@@ -159,9 +159,10 @@ This table serves as a non-normative summary of the DNS mapping for SVCB.
 | **Name prefix**                  | `_dns` for port 53, else `_$PORT._dns` |
 | **Automatically Mandatory Keys** | `port`, `no-default-alpn`              |
 | **SvcParam defaults**            | `alpn`: \["dot"\]                      |
-| **Special behaviors**            | Inherits all HTTPS RR SvcParamKeys     |
+| **Special behaviors**            | Supports all HTTPS RR SvcParamKeys     |
 |                                  | Overrides the HTTPS RR for DoH         |
 |                                  | Default port is per-transport          |
+|                                  | No encrypted -> cleartext fallback     |
 
 # Acknowledgments
 {:numbered="false"}
