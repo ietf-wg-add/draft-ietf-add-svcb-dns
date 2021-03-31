@@ -47,7 +47,7 @@ when, and only when, they appear in all capitals, as shown here.
 
 # Name form
 
-Names are formed using Port-Prefix Naming ({{SVCB}} Section 2.3).  For example, a DNS service identified by the name "dns1.example.com" and (unusually) the non-default port number 5353 would be represented as `_5353._dns.dns1.example.com.`.
+Names are formed using Port-Prefix Naming ({{SVCB}} Section 2.3).  For example, a DNS service identified by the name "dns1.example.com" and (unusually) the non-default port number 5353 would be represented as `_5353._dns.dns1.example.com.`. A DNS service using the default port number of 53 would be represented as `_dns.dns1.example.com.`.
 
 # Applicable existing SvcParamKeys
 
