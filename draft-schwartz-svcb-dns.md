@@ -93,10 +93,15 @@ The `dns:` URI scheme {{?DNSURI=RFC4501}} describes a way to represent DNS queri
 
 # Examples
 
+* A resolver at `simple.example` that support DNS over TLS on port 853 (implicitly,
+  as this is the default protocol and its default port):
+
+      _dns.simple.example. 7200 IN SVCB 1 simple.example.
+
 * A resolver at `resolver.example` that supports
-  * DNS over TLS on `resolver.example`, port 853 and 8530, with `resolver.example` as the Authentication Domain Name (SvcPriority 1 and 2),
-  * DNS over HTTPS at `https://resolver.example/dns-query{?dns}` (SvcPriority 2), and
-  * an experimental protocol on `fooexp.resolver.example:5353` (SvcPriority 3):
+  * DNS over TLS on `resolver.example` ports 853 (implicit in record 1) and 8530 (explicit in record 2), with `resolver.example` as the Authentication Domain Name,
+  * DNS over HTTPS at `https://resolver.example/dns-query{?dns}` (record 1), and
+  * an experimental protocol on `fooexp.resolver.example:5353` (record 3):
 
         $ORIGIN resolver.example.
         _dns 7200 IN SVCB 1 @ alpn=h2,h3 dohpath=/dns-query{?dns}
