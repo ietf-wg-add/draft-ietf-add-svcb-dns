@@ -51,21 +51,19 @@ Names are formed using Port-Prefix Naming ({{SVCB}} Section 2.3).  For example, 
 
 # Applicable existing SvcParamKeys
 
-## alpn and no-default-alpn
+## alpn
 
-These keys indicate the set of supported protocols ({{SVCB}} Section 6.1).  The default protocol is "dot", indicating support for DNS over TLS {{!DOT=RFC7858}}.
+This key indicates the set of supported protocols ({{SVCB}} Section 6.1).  There is no default protocol, so the `no-default-alpn` key does not apply.
 
 If the protocol set contains any HTTP versions (e.g. "h2", "h3"), then the record indicates support for DNS over HTTPS {{!DOH=RFC8484}}, and the "dohpath" key MUST be present ({{dohpath}}).  All keys specified for use with the HTTPS record are also permissible, and apply to the resulting HTTP connection.
 
 If the protocol set contains protocols with different default ports, and no port key is specified, then protocols are contacted separately on their default ports.  Note that in this configuration, ALPN negotiation does not defend against cross-protocol downgrade attacks.
 
-These keys are automatically mandatory if present.  (See Section 7 of {{SVCB}} for the definition of "automatically mandatory".)
-
 ## port
 
-This key is used to indicate the target port for connection (({{SVCB}} Section 6.2)).  If omitted, the client SHALL use the default port for each transport protocol (853 for DNS over TLS, 443 for DNS over HTTPS).
+This key is used to indicate the target port for connection (({{SVCB}} Section 6.2)).  If omitted, the client SHALL use the default port for each transport protocol (853 for DNS over TLS {{!DOT=RFC7858}}, 443 for DNS over HTTPS).
 
-This key is automatically mandatory if present.
+This key is automatically mandatory if present.  (See Section 7 of {{SVCB}} for the definition of "automatically mandatory".)
 
 ## Other applicable SvcParamKeys
 
@@ -93,13 +91,13 @@ The `dns:` URI scheme {{?DNSURI=RFC4501}} describes a way to represent DNS queri
 
 # Examples
 
-* A resolver at `simple.example` that supports DNS over TLS on port 853 (implicitly, as this is the default protocol and its default port):
+* A resolver at `simple.example` that supports DNS over TLS on port 853 (implicitly, as this is its default port):
 
-      _dns.simple.example. 7200 IN SVCB 1 simple.example.
+      _dns.simple.example. 7200 IN SVCB 1 alpn=dot simple.example.
 
 * A resolver at `doh.example` that supports only DNS over HTTPS (DNS over TLS is disabled):
-      _dns.doh.example. 7200 IN SVCB 1 doh.example. ( no-default-alpn
-        alpn=h2 dohpath=/dns-query{?dns} )
+      _dns.doh.example. 7200 IN SVCB 1 doh.example. (
+            alpn=h2 dohpath=/dns-query{?dns} )
 
 * A resolver at `resolver.example` that supports
   * DNS over TLS on `resolver.example` ports 853 (implicit in record 1) and 8530 (explicit in record 2), with `resolver.example` as the Authentication Domain Name,
@@ -107,10 +105,9 @@ The `dns:` URI scheme {{?DNSURI=RFC4501}} describes a way to represent DNS queri
   * an experimental protocol on `fooexp.resolver.example:5353` (record 3):
 
         $ORIGIN resolver.example.
-        _dns 7200 IN SVCB 1 @ alpn=h2,h3 dohpath=/dns-query{?dns}
-                     SVCB 2 @ port=8530
-                     SVCB 3 fooexp ( port=5353
-          alpn=foo no-default-alpn foo-info=... )
+        _dns 7200 IN SVCB 1 @ alpn=dot,h2,h3 dohpath=/dns-query{?dns}
+                     SVCB 2 @ alpn=dot port=8530
+                     SVCB 3 fooexp port=5353 alpn=foo foo-info=...
 
 * A nameserver at `ns.example` whose service configuration is published on a different domain:
 
@@ -163,8 +160,7 @@ This table serves as a non-normative summary of the DNS mapping for SVCB.
 | **Mapped scheme**                | "dns"                                  |
 | **RR type**                      | SVCB (64)                              |
 | **Name prefix**                  | `_dns` for port 53, else `_$PORT._dns` |
-| **Automatically Mandatory Keys** | `port`, `no-default-alpn`              |
-| **SvcParam defaults**            | `alpn`: \["dot"\]                      |
+| **Automatically Mandatory Keys** | `port`                                 |
 | **Special behaviors**            | Supports all HTTPS RR SvcParamKeys     |
 |                                  | Overrides the HTTPS RR for DoH         |
 |                                  | Default port is per-transport          |
