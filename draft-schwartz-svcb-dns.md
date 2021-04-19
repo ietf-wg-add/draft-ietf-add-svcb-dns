@@ -160,7 +160,7 @@ This table serves as a non-normative summary of the DNS mapping for SVCB.
 | **Mapped scheme**                | "dns"                                  |
 | **RR type**                      | SVCB (64)                              |
 | **Name prefix**                  | `_dns` for port 53, else `_$PORT._dns` |
-| **Mandatory keys**               | `alpn`                                 |
+| **Required keys**                | `alpn`                                 |
 | **Automatically Mandatory Keys** | `port`                                 |
 | **Special behaviors**            | Supports all HTTPS RR SvcParamKeys     |
 |                                  | Overrides the HTTPS RR for DoH         |
