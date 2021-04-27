@@ -47,7 +47,13 @@ when, and only when, they appear in all capitals, as shown here.
 
 # Name form
 
-Names are formed using Port-Prefix Naming ({{SVCB}} Section 2.3).  For example, a DNS service identified by the name "dns1.example.com" and (unusually) the non-default port number 5353 would be represented as `_5353._dns.dns1.example.com.`. A DNS service using the default port number of 53 would be represented as `_dns.dns1.example.com.`.
+Names are formed using Port-Prefix Naming ({{SVCB}} Section 2.3), with a scheme of "dns".  For example, SVCB records for a DNS service identified as `dns1.example.com` would be located at `_dns.dns1.example.com`.
+
+## Special case: non-default ports
+
+Normally, a DNS service is identified by an IP address or a domain name.  When connecting to the service using unencrypted DNS over UDP or TCP, clients use the default port number for DNS (53).  However, in rare cases, a DNS service might be identified by both a name and a port number.  For example, the `dns:` URI scheme {{?DNSURI=RFC4501}} optionally includes an authority, comprised of a host and a port number (with a default of 53).  DNS URIs normally omit the authority, or specify an IP address, but a hostname and non-default port number are allowed.
+
+When a non-default port number is part of a service identifier, Port-Prefix Naming places the port number in an additional a prefix on the name.  For example, SVCB records for a DNS service identified as `dns1.example.com:9953` would be located at `_9953._dns.dns1.example.com`.  If two DNS services operating on different port numbers provide different behaviors, this arrangement allows them to preserve the distinction when specifying alternative endpoints.
 
 # Applicable existing SvcParamKeys
 
@@ -84,10 +90,6 @@ Clients SHOULD NOT query for any "HTTPS" RRs when using the constructed URI Temp
 # Limitations
 
 This document is concerned exclusively with the DNS transport, and does not affect or inform the construction or interpretation of DNS messages.  For example, nothing in this document indicates whether the service is intended for use as a recursive or authoritative DNS server.  Clients must know the intended use in their context.
-
-# Relationship to DNS URIs
-
-The `dns:` URI scheme {{?DNSURI=RFC4501}} describes a way to represent DNS queries as URIs.  This scheme optionally includes an authority, comprised of a host and port number (with a default of 53).  DNS URIs normally omit the authority, or specify an IP address, but a hostname is allowed, in which case it is suitable for use with this mapping.
 
 # Examples
 
