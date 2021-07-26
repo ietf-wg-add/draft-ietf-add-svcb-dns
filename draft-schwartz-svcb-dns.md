@@ -73,11 +73,13 @@ This key is automatically mandatory if present.  (See Section 7 of {{SVCB}} for 
 
 ## Other applicable SvcParamKeys
 
-These SvcParamKeys apply to the "dns" scheme without modification:
+These SvcParamKeys from {{SVCB}} apply to the "dns" scheme without modification:
 
-* echconfig
+* ech
 * ipv4hint
 * ipv6hint
+
+Future SvcParamKeys may also be applicable.
 
 # New SvcParamKeys
 
@@ -97,7 +99,8 @@ This document is concerned exclusively with the DNS transport, and does not affe
 
       _dns.simple.example. 7200 IN SVCB 1 simple.example. alpn=dot
 
-* A resolver at `doh.example` that supports only DNS over HTTPS (DNS over TLS is disabled):
+* A resolver at `doh.example` that supports only DNS over HTTPS (DNS over TLS is not supported):
+
       _dns.doh.example. 7200 IN SVCB 1 doh.example. (
             alpn=h2 dohpath=/dns-query{?dns} )
 
@@ -132,7 +135,7 @@ To mitigate this attack, a client of this SVCB mapping MUST NOT provide client a
 
 ## Adversary on the transport path
 
-This section considers an adversary who can modify network traffic between the client and the SvcDomainName (i.e. the destination server).
+This section considers an adversary who can modify network traffic between the client and the alternative service (identified by the TargetName).
 
 For a SVCB-reliant client ({{SVCB}} Section 3), this adversary can only cause a denial of service.  However, because DNS is unencrypted by default, this adversary can execute a downgrade attack against SVCB-optional clients.  Accordingly, when use of this specification is optional, clients SHOULD switch to SVCB-reliant behavior if SVCB resolution succeeds.  Specifications making using of this mapping MAY adjust this fallback behavior to suit their requirements.
 
@@ -172,4 +175,4 @@ This table serves as a non-normative summary of the DNS mapping for SVCB.
 # Acknowledgments
 {:numbered="false"}
 
-TODO acknowledge.
+Thanks to the many reviewers and contributors, including Daniel Migault, Paul Hoffman, Matt Norhoff, Peter van Dijk, Eric Rescorla, and Andreas Schulze.
