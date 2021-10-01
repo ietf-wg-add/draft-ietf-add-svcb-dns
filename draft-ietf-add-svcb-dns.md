@@ -1,7 +1,7 @@
 ---
 title: "Service Binding Mapping for DNS Servers"
 abbrev: "SVCB for DNS"
-docname: draft-schwartz-svcb-dns-latest
+docname: draft-ietf-add-svcb-dns-latest
 category: std
 
 ipr: trust200902
