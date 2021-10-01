@@ -145,7 +145,7 @@ Per {{SVCB}} IANA would be directed to add the following entry to the SVCB Servi
 
 | Number  | Name    | Meaning                      | Reference       |
 | ------- | ------- | ---------------------------- | --------------- |
-| TBD     | dohpath | DNS over HTTPS path template | (This document) |
+| 7       | dohpath | DNS over HTTPS path template | (This document) |
 
 Per {{?Attrleaf=RFC8552}}, IANA would be directed to add the following entry to the DNS Underscore Global Scoped Entry Registry:
 
