@@ -47,19 +47,19 @@ when, and only when, they appear in all capitals, as shown here.
 
 # Name form
 
-Names are formed using Port-Prefix Naming ({{SVCB}} Section 2.3), with a scheme of "dns".  For example, SVCB records for a DNS service identified as `dns1.example.com` would be located at `_dns.dns1.example.com`.
+Names are formed using Port-Prefix Naming ({{Section 2.3 of SVCB}}), with a scheme of "dns".  For example, SVCB records for a DNS service identified as "`dns1.example.com`" would be located at "`_dns.dns1.example.com`".
 
 ## Special case: non-default ports
 
 Normally, a DNS service is identified by an IP address or a domain name.  When connecting to the service using unencrypted DNS over UDP or TCP, clients use the default port number for DNS (53).  However, in rare cases, a DNS service might be identified by both a name and a port number.  For example, the `dns:` URI scheme {{?DNSURI=RFC4501}} optionally includes an authority, comprised of a host and a port number (with a default of 53).  DNS URIs normally omit the authority, or specify an IP address, but a hostname and non-default port number are allowed.
 
-When a non-default port number is part of a service identifier, Port-Prefix Naming places the port number in an additional a prefix on the name.  For example, SVCB records for a DNS service identified as `dns1.example.com:9953` would be located at `_9953._dns.dns1.example.com`.  If two DNS services operating on different port numbers provide different behaviors, this arrangement allows them to preserve the distinction when specifying alternative endpoints.
+When a non-default port number is part of a service identifier, Port-Prefix Naming places the port number in an additional a prefix on the name.  For example, SVCB records for a DNS service identified as "`dns1.example.com:9953`" would be located at "`_9953._dns.dns1.example.com`".  If two DNS services operating on different port numbers provide different behaviors, this arrangement allows them to preserve the distinction when specifying alternative endpoints.
 
 # Applicable existing SvcParamKeys
 
 ## alpn
 
-This key indicates the set of supported protocols ({{SVCB}} Section 6.1).  There is no default protocol, so the `no-default-alpn` key does not apply, and the `alpn` key MUST be present.
+This key indicates the set of supported protocols ({{Section 6.1 of SVCB}}).  There is no default protocol, so the `no-default-alpn` key does not apply, and the `alpn` key MUST be present.
 
 If the protocol set contains any HTTP versions (e.g. "h2", "h3"), then the record indicates support for DNS over HTTPS {{!DOH=RFC8484}}, and the "dohpath" key MUST be present ({{dohpath}}).  All keys specified for use with the HTTPS record are also permissible, and apply to the resulting HTTP connection.
 
@@ -67,9 +67,9 @@ If the protocol set contains protocols with different default ports, and no port
 
 ## port
 
-This key is used to indicate the target port for connection (({{SVCB}} Section 6.2)).  If omitted, the client SHALL use the default port for each transport protocol (853 for DNS over TLS {{!DOT=RFC7858}}, 443 for DNS over HTTPS).
+This key is used to indicate the target port for connection (({{Section 6.2 of SVCB}})).  If omitted, the client SHALL use the default port for each transport protocol (853 for DNS over TLS {{!DOT=RFC7858}}, 443 for DNS over HTTPS).
 
-This key is automatically mandatory if present.  (See Section 7 of {{SVCB}} for the definition of "automatically mandatory".)
+This key is automatically mandatory if present.  (See {{Section 7 of SVCB}} for the definition of "automatically mandatory".)
 
 ## Other applicable SvcParamKeys
 
