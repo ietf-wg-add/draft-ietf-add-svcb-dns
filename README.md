@@ -1,10 +1,10 @@
 # Service Binding Mapping for DNS URIs
 
-This is the working area for the individual Internet-Draft, "Service Binding Mapping for DNS URIs".
+This is the working area for the IETF [ADD Working Group](https://datatracker.ietf.org/wg/add/documents/) Internet-Draft, "Service Binding Mapping for DNS URIs".
 
-* [Editor's Copy](https://bemasc.github.io/svcb-dns/#go.draft-schwartz-svcb-dns.html)
-* [Individual Draft](https://tools.ietf.org/html/draft-schwartz-svcb-dns)
-* [Compare Editor's Copy to Individual Draft](https://bemasc.github.io/svcb-dns/#go.draft-schwartz-svcb-dns.diff)
+* [Editor's Copy](https://ietf-wg-add.github.io/draft-ietf-add-svcb-dns/draft-ietf-add-svcb-dns.html)
+* [Working Group Draft](https://tools.ietf.org/html/draft-ietf-add-svcb-dns)
+* [Compare Editor's Copy to Working Group Draft](https://ietf-wg-add.github.io/draft-ietf-add-svcb-dns/draft-ietf-add-svcb-dns.diff)
 
 ## Building the Draft
 
@@ -21,4 +21,4 @@ This requires that you have the necessary software installed.  See
 ## Contributing
 
 See the
-[guidelines for contributions](https://github.com/bemasc/svcb-dns/blob/main/CONTRIBUTING.md).
+[guidelines for contributions](https://github.com/ietf-wg-add/draft-ietf-add-svcb-dns/blob/main/CONTRIBUTING.md).
