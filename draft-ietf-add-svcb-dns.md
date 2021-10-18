@@ -85,7 +85,14 @@ Future SvcParamKeys may also be applicable.
 
 ## dohpath {#dohpath}
 
-"dohpath" is a single-valued SvcParamKey whose value (both in presentation and wire format) is a relative URI Template {{!RFC6570}}, normally starting with "/".  If the "alpn" SvcParamKey indicates support for HTTP, clients MAY construct a DNS over HTTPS URI Template by combining the prefix "https://", the service name, the port from the "port" key if present, and the "dohpath" value.  (The DNS service's original port number MUST NOT be used.)
+"dohpath" is a single-valued SvcParamKey whose value (both in presentation and wire format) MUST be a URI Template {{!RFC6570}} encoded in UTF-8 {{!RFC3629}}.  If the "alpn" SvcParamKey indicates support for HTTP, "dohpath" MUST be present, and clients MAY construct a DNS over HTTPS URI Template as follows:
+
+1. Let `$HOST` be the service name
+2. Let `$PORT` be the port from the "port" key if present, otherwise 443. (The binding authority's port number MUST NOT be used.)
+3. Let `$DOHPATH` be the "dohpath" value, decoded from UTF-8.
+4. The DNS over HTTPS URI Template is `"https://$HOST:$PORT$DOHPATH"`.
+
+The "dohpath" value MUST be chosen such that the resulting URI Template is valid for use with DNS over HTTPS.  For example, DNS over HTTPS servers are required to support requests using GET and POST methods.  The GET method relies on the "dns" URI Template parameter, and the POST method does not use it.  Therefore, the URI Template is required to make use of a "dns" variable, and result in a valid URI whether or not "dns" is defined.
 
 Clients SHOULD NOT query for any "HTTPS" RRs when using the constructed URI Template.  Instead, the SvcParams and address records associated with this SVCB record SHOULD be used for the HTTPS connection, with the same semantics as an HTTPS RR.  However, for consistency, service operators SHOULD publish an equivalent HTTPS RR, especially if clients might learn this URI Template through a different channel.
 
