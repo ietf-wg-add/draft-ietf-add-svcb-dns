@@ -117,7 +117,7 @@ This document is concerned exclusively with the DNS transport, and does not affe
 
 * A nameserver at "`ns.example`" whose service configuration is published on a different domain:
 
-      _dns.ns.example. 7200 IN SVCB 0 _dns.ns.nic
+      _dns.ns.example. 7200 IN SVCB 0 _dns.ns.nic.example.
 
 # Security Considerations
 
