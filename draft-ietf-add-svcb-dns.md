@@ -45,17 +45,20 @@ The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD",
 document are to be interpreted as described in BCP 14 {{RFC2119}} {{!RFC8174}}
 when, and only when, they appear in all capitals, as shown here.
 
-# Name form
+# Identities and Names
 
-In this specification, DNS services are identified by a "binding authority" (which MUST be an "`authority`" as in {{Section 3.2 of !RFC3986}}) and an "authentication name" (which MUST be a "`host`" as in {{Section 3.2.2 of !RFC3986}})).  Unless otherwise specified, the authentication name is the Host from the binding authority.
+SVCB record names (i.e. QNAMEs) are formed using Port-Prefix Naming ({{Section 2.3 of SVCB}}), with a scheme of "dns".  For example, SVCB records for a DNS service identified as "`dns1.example.com`" would be queried at "`_dns.dns1.example.com`".
 
-SVCB record names (i.e. QNAMEs) are formed from the binding authority using Port-Prefix Naming ({{Section 2.3 of SVCB}}), with a scheme of "dns".  For example, if the "binding authority" is "`dns1.example.com`", the client would query for SVCB records at "`_dns.dns1.example.com`".
+In some use cases, the name used for retrieving these DNS records is different from the server identity used to authenticate the secure transport.  To distinguish them, we use the following terms:
+
+ * Binding authority - The service name ({{Section 1.4 of SVCB}}) and optional port number used as input to Port-Prefix Naming.
+ * Authentication name - The name used for secure transport authentication.  It must be a DNS hostname or a literal IP address.  Unless otherwise specified, it is the service name from the binding authority.
 
 ## Special case: non-default ports
 
 Normally, a DNS service is identified by an IP address or a domain name.  When connecting to the service using unencrypted DNS over UDP or TCP, clients use the default port number for DNS (53).  However, in rare cases, a DNS service might be identified by both a name and a port number.  For example, the `dns:` URI scheme {{?DNSURI=RFC4501}} optionally includes an authority, comprised of a host and a port number (with a default of 53).  DNS URIs normally omit the authority, or specify an IP address, but a hostname and non-default port number are allowed.
 
-When a non-default port number is part of the binding authority, Port-Prefix Naming places the port number in an additional a prefix on the name.  For example, if the binding authority is "`dns1.example.com:9953`", the client would query for SVCB records at "`_9953._dns.dns1.example.com`".  If two DNS services operating on different port numbers provide different behaviors, this arrangement allows them to preserve the distinction when specifying alternative endpoints.
+When the binding authority specifies a non-default port number, Port-Prefix Naming places the port number in an additional a prefix on the name.  For example, if the binding authority is "`dns1.example.com:9953`", the client would query for SVCB records at "`_9953._dns.dns1.example.com`".  If two DNS services operating on different port numbers provide different behaviors, this arrangement allows them to preserve the distinction when specifying alternative endpoints.
 
 # Applicable existing SvcParamKeys
 
