@@ -95,29 +95,29 @@ This document is concerned exclusively with the DNS transport, and does not affe
 
 # Examples
 
-* A resolver at `simple.example` that supports DNS over TLS on port 853 (implicitly, as this is its default port):
+* A resolver at "`simple.example`" that supports DNS over TLS on port 853 (implicitly, as this is its default port):
 
       _dns.simple.example. 7200 IN SVCB 1 simple.example. alpn=dot
 
-* A resolver at `doh.example` that supports only DNS over HTTPS (DNS over TLS is not supported):
+* A resolver at "`doh.example`" that supports only DNS over HTTPS (DNS over TLS is not supported):
 
       _dns.doh.example. 7200 IN SVCB 1 doh.example. (
             alpn=h2 dohpath=/dns-query{?dns} )
 
-* A resolver at `resolver.example` that supports
-  * DNS over TLS on `resolver.example` ports 853 (implicit in record 1) and 8530 (explicit in record 2), with `resolver.example` as the Authentication Domain Name,
+* A resolver at "`resolver.example`" that supports:
+
+  * DNS over TLS on "`resolver.example`" ports 853 (implicit in record 1) and 8530 (explicit in record 2), with "`resolver.example`" as the Authentication Domain Name,
   * DNS over HTTPS at `https://resolver.example/dns-query{?dns}` (record 1), and
   * an experimental protocol on `fooexp.resolver.example:5353` (record 3):
 
-        $ORIGIN resolver.example.
-        _dns 7200 IN SVCB 1 @ alpn=dot,h2,h3 dohpath=/dns-query{?dns}
-                     SVCB 2 @ alpn=dot port=8530
-                     SVCB 3 fooexp port=5353 alpn=foo foo-info=...
+        _dns.resolver.example.  7200 IN SVCB 1 resolver.example. (
+            alpn=dot,h2,h3 dohpath=/dns-query{?dns} )
+        _dns.resolver.example.  7200 IN SVCB 2 resolver.example. alpn=dot port=8530
+        _dns.resolver.example.  7200 IN SVCB 3 fooexp port=5353 alpn=foo foo-info=...
 
-* A nameserver at `ns.example` whose service configuration is published on a different domain:
+* A nameserver at "`ns.example`" whose service configuration is published on a different domain:
 
-      $ORIGIN example.
-      _dns.ns 7200 IN SVCB 0 _dns.ns.nic
+      _dns.ns.example. 7200 IN SVCB 0 _dns.ns.nic.example.
 
 # Security Considerations
 
