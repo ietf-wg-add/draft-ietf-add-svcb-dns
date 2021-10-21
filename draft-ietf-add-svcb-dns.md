@@ -45,15 +45,20 @@ The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD",
 document are to be interpreted as described in BCP 14 {{RFC2119}} {{!RFC8174}}
 when, and only when, they appear in all capitals, as shown here.
 
-# Name form
+# Identities and Names
 
-Names are formed using Port-Prefix Naming ({{Section 2.3 of SVCB}}), with a scheme of "dns".  For example, SVCB records for a DNS service identified as "`dns1.example.com`" would be located at "`_dns.dns1.example.com`".
+SVCB record names (i.e. QNAMEs) are formed using Port-Prefix Naming ({{Section 2.3 of SVCB}}), with a scheme of "dns".  For example, SVCB records for a DNS service identified as "`dns1.example.com`" would be queried at "`_dns.dns1.example.com`".
+
+In some use cases, the name used for retrieving these DNS records is different from the server identity used to authenticate the secure transport.  To distinguish them, we use the following terms:
+
+ * Binding authority - The service name ({{Section 1.4 of SVCB}}) and optional port number used as input to Port-Prefix Naming.
+ * Authentication name - The name used for secure transport authentication.  It must be a DNS hostname or a literal IP address.  Unless otherwise specified, it is the service name from the binding authority.
 
 ## Special case: non-default ports
 
 Normally, a DNS service is identified by an IP address or a domain name.  When connecting to the service using unencrypted DNS over UDP or TCP, clients use the default port number for DNS (53).  However, in rare cases, a DNS service might be identified by both a name and a port number.  For example, the `dns:` URI scheme {{?DNSURI=RFC4501}} optionally includes an authority, comprised of a host and a port number (with a default of 53).  DNS URIs normally omit the authority, or specify an IP address, but a hostname and non-default port number are allowed.
 
-When a non-default port number is part of a service identifier, Port-Prefix Naming places the port number in an additional a prefix on the name.  For example, SVCB records for a DNS service identified as "`dns1.example.com:9953`" would be located at "`_9953._dns.dns1.example.com`".  If two DNS services operating on different port numbers provide different behaviors, this arrangement allows them to preserve the distinction when specifying alternative endpoints.
+When the binding authority specifies a non-default port number, Port-Prefix Naming places the port number in an additional a prefix on the name.  For example, if the binding authority is "`dns1.example.com:9953`", the client would query for SVCB records at "`_9953._dns.dns1.example.com`".  If two DNS services operating on different port numbers provide different behaviors, this arrangement allows them to preserve the distinction when specifying alternative endpoints.
 
 # Applicable existing SvcParamKeys
 
@@ -87,7 +92,7 @@ Future SvcParamKeys may also be applicable.
 
 "dohpath" is a single-valued SvcParamKey whose value (both in presentation and wire format) MUST be a URI Template {{!RFC6570}} encoded in UTF-8 {{!RFC3629}}.  If the "alpn" SvcParamKey indicates support for HTTP, "dohpath" MUST be present, and clients MAY construct a DNS over HTTPS URI Template as follows:
 
-1. Let `$HOST` be the service name
+1. Let `$HOST` be the authentication name encoded as a "`host`" value ({{Section 3.2.2 of !RFC3986}}).
 2. Let `$PORT` be the port from the "port" key if present, otherwise 443. (The binding authority's port number MUST NOT be used.)
 3. Let `$DOHPATH` be the "dohpath" value, decoded from UTF-8.
 4. The DNS over HTTPS URI Template is `"https://$HOST:$PORT$DOHPATH"`.
@@ -102,29 +107,29 @@ This document is concerned exclusively with the DNS transport, and does not affe
 
 # Examples
 
-* A resolver at `simple.example` that supports DNS over TLS on port 853 (implicitly, as this is its default port):
+* A resolver at "`simple.example`" that supports DNS over TLS on port 853 (implicitly, as this is its default port):
 
       _dns.simple.example. 7200 IN SVCB 1 simple.example. alpn=dot
 
-* A resolver at `doh.example` that supports only DNS over HTTPS (DNS over TLS is not supported):
+* A resolver at "`doh.example`" that supports only DNS over HTTPS (DNS over TLS is not supported):
 
       _dns.doh.example. 7200 IN SVCB 1 doh.example. (
             alpn=h2 dohpath=/dns-query{?dns} )
 
-* A resolver at `resolver.example` that supports
-  * DNS over TLS on `resolver.example` ports 853 (implicit in record 1) and 8530 (explicit in record 2), with `resolver.example` as the Authentication Domain Name,
+* A resolver at "`resolver.example`" that supports:
+
+  * DNS over TLS on "`resolver.example`" ports 853 (implicit in record 1) and 8530 (explicit in record 2), with "`resolver.example`" as the Authentication Domain Name,
   * DNS over HTTPS at `https://resolver.example/dns-query{?dns}` (record 1), and
   * an experimental protocol on `fooexp.resolver.example:5353` (record 3):
 
-        $ORIGIN resolver.example.
-        _dns 7200 IN SVCB 1 @ alpn=dot,h2,h3 dohpath=/dns-query{?dns}
-                     SVCB 2 @ alpn=dot port=8530
-                     SVCB 3 fooexp port=5353 alpn=foo foo-info=...
+        _dns.resolver.example.  7200 IN SVCB 1 resolver.example. (
+            alpn=dot,h2,h3 dohpath=/dns-query{?dns} )
+        _dns.resolver.example.  7200 IN SVCB 2 resolver.example. alpn=dot port=8530
+        _dns.resolver.example.  7200 IN SVCB 3 fooexp port=5353 alpn=foo foo-info=...
 
-* A nameserver at `ns.example` whose service configuration is published on a different domain:
+* A nameserver at "`ns.example`" whose service configuration is published on a different domain:
 
-      $ORIGIN example.
-      _dns.ns 7200 IN SVCB 0 _dns.ns.nic
+      _dns.ns.example. 7200 IN SVCB 0 _dns.ns.nic.example.
 
 # Security Considerations
 
@@ -132,7 +137,7 @@ This document is concerned exclusively with the DNS transport, and does not affe
 
 This section considers an adversary who can add or remove responses to the SVCB query.
 
-Clients MUST authenticate the server to its name during secure transport establishment.  This name is the hostname used to construct the original SVCB query, and cannot be influenced by the SVCB record contents.  Accordingly, this draft does not mandate the use of DNSSEC.  This draft also does not specify how clients authenticate the name (e.g. selection of roots of trust), which might vary according to the context.
+During secure transport establishment, clients MUST authenticate the server to its authentication name, which is not influenced by the SVCB record contents.  Accordingly, this draft does not mandate the use of DNSSEC.  This draft also does not specify how clients authenticate the name (e.g. selection of roots of trust), which might vary according to the context.
 
 Although this adversary cannot alter the authentication name of the service, it does have control of the port number and "dohpath" value.  As a result, the adversary can direct DNS queries for $HOSTNAME to any port on $HOSTNAME, and any path on "https://$HOSTNAME", even if $HOSTNAME is not actually a DNS server.  If the DNS client uses shared TLS or HTTP state, the client could be correctly authenticated (e.g. using a TLS client certificate or HTTP cookie).
 
