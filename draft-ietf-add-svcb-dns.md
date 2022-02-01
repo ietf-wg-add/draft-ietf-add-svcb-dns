@@ -45,7 +45,7 @@ The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD",
 document are to be interpreted as described in BCP 14 {{RFC2119}} {{!RFC8174}}
 when, and only when, they appear in all capitals, as shown here.
 
-# Identities and Names
+# Identities and Names {#identity}
 
 SVCB record names (i.e. QNAMEs) are formed using Port-Prefix Naming ({{Section 2.3 of SVCB}}), with a scheme of "dns".  For example, SVCB records for a DNS service identified as "`dns1.example.com`" would be queried at "`_dns.dns1.example.com`".
 
@@ -124,8 +124,10 @@ This document is concerned exclusively with the DNS transport, and does not affe
 
         _dns.resolver.example.  7200 IN SVCB 1 resolver.example. (
             alpn=dot,h2,h3 dohpath=/dns-query{?dns} )
-        _dns.resolver.example.  7200 IN SVCB 2 resolver.example. alpn=dot port=8530
-        _dns.resolver.example.  7200 IN SVCB 3 fooexp port=5353 alpn=foo foo-info=...
+        _dns.resolver.example.  7200 IN SVCB 2 resolver.example. (
+            alpn=dot port=8530 )
+        _dns.resolver.example.  7200 IN SVCB 3 fooexp (
+              port=5353 alpn=foo foo-info=... )
 
 * A nameserver at "`ns.example`" whose service configuration is published on a different domain:
 
@@ -139,27 +141,33 @@ This section considers an adversary who can add or remove responses to the SVCB 
 
 During secure transport establishment, clients MUST authenticate the server to its authentication name, which is not influenced by the SVCB record contents.  Accordingly, this draft does not mandate the use of DNSSEC.  This draft also does not specify how clients authenticate the name (e.g. selection of roots of trust), which might vary according to the context.
 
-Although this adversary cannot alter the authentication name of the service, it does have control of the port number and "dohpath" value.  As a result, the adversary can direct DNS queries for $HOSTNAME to any port on $HOSTNAME, and any path on "https://$HOSTNAME", even if $HOSTNAME is not actually a DNS server.  If the DNS client uses shared TLS or HTTP state, the client could be correctly authenticated (e.g. using a TLS client certificate or HTTP cookie).
+### Downgrade attacks
 
-This behavior creates a number of possible attacks for certain server configurations.  For example, if "https://$HOSTNAME/upload" accepts any POST request as a public file upload, the adversary could forge a SVCB record containing `dohpath=/upload`.  This would cause the client to upload and publish every query, resulting in unexpected storage costs for the server and privacy loss for the client.
+This attacker cannot impersonate the secure endpoint, but it can forge a response indicating that the requested SVCB records do not exist.  For a SVCB-reliant client ({{SVCB, Section 3}}) this only results in a denial of service.  However, SVCB-optional clients will generally fall back to insecure DNS in this case, exposing all DNS traffic to attacks.
 
-To mitigate this attack, a client of this SVCB mapping MUST NOT provide client authentication for DNS queries, except to servers that it specifically knows are not vulnerable to such attacks, and a DoH service operator MUST ensure that all unauthenticated DoH requests to its origin maintain the DoH service's privacy guarantees, regardless of the path.  Also, if an alternative service endpoint sends an invalid response to a DNS query, the client SHOULD NOT send more queries to that endpoint.
+### Redirection attacks
+
+SVCB-reliant clients always enforce the authentication domain name, but they are still subject to attacks using the transport, port number, and "dohpath" value, which are controlled by this adversary.  By changing these values in the SVCB answers, the adversary can direct DNS queries for $HOSTNAME to any port on $HOSTNAME, and any path on "https://$HOSTNAME".  If the DNS client uses shared TLS or HTTP state, the client could be correctly authenticated (e.g. using a TLS client certificate or HTTP cookie).
+
+This behavior creates a number of possible attacks for certain server configurations.  For example, if "https://$HOSTNAME/upload" accepts any POST request as a public file upload, the adversary could forge a SVCB record containing `dohpath=/upload`.  This would cause the client to upload and publish every query, resulting in unexpected storage costs for the server and privacy loss for the client.  Similarly, if two DoH endpoints are available on the same origin, and the service has designated one of them for use with this specification, this adversary can cause clients to use the other endpoint instead.
+
+To mitigate redirection attacks, a client of this SVCB mapping MUST NOT provide client authentication for DNS queries, except to servers that it specifically knows are not vulnerable to such attacks.  If an endpoint sends an invalid response to a DNS query, the client SHOULD NOT send more queries to that endpoint.  DNS services that are identified by a hostname ({{identity}}) MUST ensure that all unauthenticated DNS requests to that name receive any promised privacy and security guarantees, regardless of transport, port number, or HTTP path.
 
 ## Adversary on the transport path
 
 This section considers an adversary who can modify network traffic between the client and the alternative service (identified by the TargetName).
 
-For a SVCB-reliant client ({{SVCB}} Section 3), this adversary can only cause a denial of service.  However, because DNS is unencrypted by default, this adversary can execute a downgrade attack against SVCB-optional clients.  Accordingly, when use of this specification is optional, clients SHOULD switch to SVCB-reliant behavior if SVCB resolution succeeds.  Specifications making using of this mapping MAY adjust this fallback behavior to suit their requirements.
+For a SVCB-reliant client, this adversary can only cause a denial of service.  However, because DNS is unencrypted by default, this adversary can execute a downgrade attack against SVCB-optional clients.  Accordingly, when use of this specification is optional, clients SHOULD switch to SVCB-reliant behavior if SVCB resolution succeeds.  Specifications making using of this mapping MAY adjust this fallback behavior to suit their requirements.
 
 # IANA Considerations
 
-Per {{SVCB}} IANA would be directed to add the following entry to the SVCB Service Parameters registry.
+Per {{SVCB}} IANA is directed to add the following entry to the SVCB Service Parameters registry.
 
 | Number  | Name    | Meaning                      | Reference       |
 | ------- | ------- | ---------------------------- | --------------- |
 | 7       | dohpath | DNS over HTTPS path template | (This document) |
 
-Per {{?Attrleaf=RFC8552}}, IANA would be directed to add the following entry to the DNS Underscore Global Scoped Entry Registry:
+Per {{?Attrleaf=RFC8552}}, IANA is directed to add the following entry to the DNS Underscore Global Scoped Entry Registry:
 
 | RR TYPE | _NODE NAME | Meaning       | Reference       |
 | ------- | ---------- | ------------- | --------------- |
