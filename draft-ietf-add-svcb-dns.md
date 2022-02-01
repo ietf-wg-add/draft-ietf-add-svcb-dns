@@ -72,7 +72,7 @@ If the protocol set contains protocols with different default ports, and no port
 
 ## port
 
-This key is used to indicate the target port for connection (({{Section 6.2 of SVCB}})).  If omitted, the client SHALL use the default port for each transport protocol (853 for DNS over TLS {{!DOT=RFC7858}}, 443 for DNS over HTTPS).
+This key is used to indicate the target port for connection ({{Section 6.2 of SVCB}}).  If omitted, the client SHALL use the default port for each transport protocol (853 for DNS over TLS {{!DOT=RFC7858}}, 443 for DNS over HTTPS).
 
 This key is automatically mandatory if present.  (See {{Section 7 of SVCB}} for the definition of "automatically mandatory".)
 
