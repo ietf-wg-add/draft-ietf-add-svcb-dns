@@ -23,7 +23,10 @@ normative:
   RFC2119:
 
 informative:
-
+  FETCH:
+    title: "Fetch Living Standard"
+    date: 11 February 2022
+    target: "https://fetch.spec.whatwg.org/"
 
 
 --- abstract
@@ -75,6 +78,12 @@ If the protocol set contains protocols with different default ports, and no port
 This key is used to indicate the target port for connection ({{Section 6.2 of SVCB}}).  If omitted, the client SHALL use the default port for each transport protocol (853 for DNS over TLS {{!DOT=RFC7858}}, 443 for DNS over HTTPS).
 
 This key is automatically mandatory if present.  (See {{Section 7 of SVCB}} for the definition of "automatically mandatory".)
+
+Support for the `port` key can be unsafe if the client has implicit elevated access to some network service (e.g. a local service that is inaccessible to remote parties) and that service uses a TCP-based protocol other than TLS.  A hostile DNS server might be able to manipulate this service by causing the client to send a specially crafted TLS SNI or session ticket that can be misparsed as a command or exploit.  To avoid such attacks, clients SHOULD NOT support the `port` key unless one of the following conditions applies:
+
+* The client is being used with a DNS server that is highly trusted.
+* The client is being used in a context where implicit elevated access cannot apply.
+* The client restricts the set of allowed TCP port values to exclude any ports where a confusion attack is likely to be possible (e.g. the "bad ports" list from {{FETCH}}).
 
 ## Other applicable SvcParamKeys
 
