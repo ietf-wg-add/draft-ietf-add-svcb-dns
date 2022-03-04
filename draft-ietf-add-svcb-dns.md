@@ -47,12 +47,12 @@ when, and only when, they appear in all capitals, as shown here.
 
 # Identities and Names {#identity}
 
-SVCB record names (i.e. QNAMEs) are formed using Port-Prefix Naming ({{Section 2.3 of SVCB}}), with a scheme of "dns".  For example, SVCB records for a DNS service identified as "`dns1.example.com`" would be queried at "`_dns.dns1.example.com`".
+SVCB record names (i.e. QNAMEs) for DNS services are formed using Port-Prefix Naming ({{Section 2.3 of SVCB}}), with a scheme of "dns".  For example, SVCB records for a DNS service identified as "`dns1.example.com`" would be queried at "`_dns.dns1.example.com`".
 
-In some use cases, the name used for retrieving these DNS records is different from the server identity used to authenticate the secure transport.  To distinguish them, we use the following terms:
+In some use cases, the name used for retrieving these DNS records is different from the server identity used to authenticate the secure transport.  To distinguish between these, this document uses the following terms:
 
  * Binding authority - The service name ({{Section 1.4 of SVCB}}) and optional port number used as input to Port-Prefix Naming.
- * Authentication name - The name used for secure transport authentication.  It must be a DNS hostname or a literal IP address.  Unless otherwise specified, it is the service name from the binding authority.
+ * Authentication name - The name used for secure transport authentication.  This MUST be a DNS hostname or a literal IP address.  Unless otherwise specified, this is the service name from the binding authority.
 
 ## Special case: non-default ports
 
@@ -80,6 +80,7 @@ This key is automatically mandatory if present.  (See {{Section 7 of SVCB}} for 
 
 These SvcParamKeys from {{SVCB}} apply to the "dns" scheme without modification:
 
+* mandatory
 * ech
 * ipv4hint
 * ipv6hint
@@ -103,7 +104,7 @@ Clients SHOULD NOT query for any "HTTPS" RRs when using the constructed URI Temp
 
 # Limitations
 
-This document is concerned exclusively with the DNS transport, and does not affect or inform the construction or interpretation of DNS messages.  For example, nothing in this document indicates whether the service is intended for use as a recursive or authoritative DNS server.  Clients must know the intended use in their context.
+This document is concerned exclusively with the DNS transport, and does not affect or inform the construction or interpretation of DNS messages.  For example, nothing in this document indicates whether the service is intended for use as a recursive or authoritative DNS server.  Clients need to know the intended use of  services based on their context.
 
 # Examples
 
