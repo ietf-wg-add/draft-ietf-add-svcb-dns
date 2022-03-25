@@ -83,7 +83,7 @@ Support for the `port` key can be unsafe if the client has implicit elevated acc
 
 * The client is being used with a DNS server that it trusts not attempt this attack.
 * The client is being used in a context where implicit elevated access cannot apply.
-* The client restricts the set of allowed TCP port values to exclude any ports where a confusion attack is likely to be possible (e.g. the "bad ports" list from {{FETCH}}).
+* The client restricts the set of allowed TCP port values to exclude any ports where a confusion attack is likely to be possible (e.g. the "bad ports" list from the "Port blocking" section of {{FETCH}}).
 
 ## Other applicable SvcParamKeys
 
