@@ -39,7 +39,7 @@ The SVCB DNS record type expresses a bound collection of endpoint metadata, for 
 
 The SVCB record type {{!SVCB=I-D.draft-ietf-dnsop-svcb-https}} provides clients with information about how to reach alternative endpoints for a service, which may have improved performance or privacy properties.  The service is identified by a "scheme" indicating the service type, a hostname, and optionally other information such as a port number.  A DNS server is often identified only by its IP address (e.g. in DHCP), but in some contexts it can also be identified by a hostname (e.g. "NS" records, manual resolver configuration) and sometimes also a non-default port number.
 
-Use of the SVCB record type requires a mapping document for each service type, indicating how a client for that service can interpret the contents of the SVCB SvcParams.  This document provides the mapping for the "dns" service type, allowing DNS servers to offer alternative endpoints and transports, including encrypted transports like DNS over TLS and DNS over HTTPS.
+Use of the SVCB record type requires a mapping document for each service type, indicating how a client for that service can interpret the contents of the SVCB SvcParams.  This document provides the mapping for the "dns" service type, allowing DNS servers to offer alternative endpoints and transports, including encrypted transports like DNS over TLS (DoT) and DNS over HTTPS (DoH).
 
 # Conventions and Definitions
 
@@ -100,16 +100,11 @@ Future SvcParamKeys may also be applicable.
 
 ## dohpath {#dohpath}
 
-"dohpath" is a single-valued SvcParamKey whose value (both in presentation and wire format) MUST be a URI Template {{!RFC6570}} encoded in UTF-8 {{!RFC3629}}.  If the "alpn" SvcParamKey indicates support for HTTP, "dohpath" MUST be present, and clients MAY construct a DNS over HTTPS URI Template as follows:
+"dohpath" is a single-valued SvcParamKey whose value (both in presentation and wire format) MUST be a URI Template {{!RFC6570}} encoded in UTF-8 {{!RFC3629}}.  If the "alpn" SvcParam indicates support for HTTP, "dohpath" MUST be present.  The URI Template MUST contain a "dns" variable, and MUST be chosen such that the result after DoH template expansion ({{Section 6 of !RFC8484}}) is always a valid and functional ":path" value ({{!RFC7540, Section 8.1.2.3}}).
 
-1. Let `$HOST` be the authentication name encoded as a "`host`" value ({{Section 3.2.2 of !RFC3986}}).
-2. Let `$PORT` be the port from the "port" key if present, otherwise 443. (The binding authority's port number MUST NOT be used.)
-3. Let `$DOHPATH` be the "dohpath" value, decoded from UTF-8.
-4. The DNS over HTTPS URI Template is `"https://$HOST:$PORT$DOHPATH"`.
+When using this SVCB record, the client MUST send any DoH requests to the HTTP origin identified by the "https" scheme, the authentication name, and the port from the "port" SvcParam (if present).  HTTP requests MUST be directed to the resource resulting from DoH template expansion of the "dohpath" value.
 
-The "dohpath" value MUST be chosen such that the resulting URI Template is valid for use with DNS over HTTPS.  For example, DNS over HTTPS servers are required to support requests using GET and POST methods.  The GET method relies on the "dns" URI Template parameter, and the POST method does not use it.  Therefore, the URI Template is required to make use of a "dns" variable, and result in a valid URI whether or not "dns" is defined.
-
-Clients SHOULD NOT query for any "HTTPS" RRs when using the constructed URI Template.  Instead, the SvcParams and address records associated with this SVCB record SHOULD be used for the HTTPS connection, with the same semantics as an HTTPS RR.  However, for consistency, service operators SHOULD publish an equivalent HTTPS RR, especially if clients might learn this URI Template through a different channel.
+Clients SHOULD NOT query for any "HTTPS" RRs when using "dohpath".  Instead, the SvcParams and address records associated with this SVCB record SHOULD be used for the HTTPS connection, with the same semantics as an HTTPS RR.  However, for consistency, service operators SHOULD publish an equivalent HTTPS RR, especially if clients might learn about this DoH service through a different channel.
 
 # Limitations
 
@@ -121,15 +116,15 @@ This document is concerned exclusively with the DNS transport, and does not affe
 
       _dns.simple.example. 7200 IN SVCB 1 simple.example. alpn=dot
 
-* A resolver at "`doh.example`" that supports only DNS over HTTPS (DNS over TLS is not supported):
+* A DoH-only resolver at `https://doh.example/dns-query{?dns}`. (DNS over TLS is not supported.):
 
       _dns.doh.example. 7200 IN SVCB 1 doh.example. (
             alpn=h2 dohpath=/dns-query{?dns} )
 
 * A resolver at "`resolver.example`" that supports:
 
-  * DNS over TLS on "`resolver.example`" ports 853 (implicit in record 1) and 8530 (explicit in record 2), with "`resolver.example`" as the Authentication Domain Name,
-  * DNS over HTTPS at `https://resolver.example/dns-query{?dns}` (record 1), and
+  * DoT on "`resolver.example`" ports 853 (implicit in record 1) and 8530 (explicit in record 2), with "`resolver.example`" as the Authentication Domain Name,
+  * DoH at `https://resolver.example/dns-query{?dns}` (record 1), and
   * an experimental protocol on `fooexp.resolver.example:5353` (record 3):
 
         _dns.resolver.example.  7200 IN SVCB 1 resolver.example. (
