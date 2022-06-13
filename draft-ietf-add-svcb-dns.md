@@ -39,7 +39,7 @@ The SVCB DNS record type expresses a bound collection of endpoint metadata, for 
 
 The SVCB record type {{!SVCB=I-D.draft-ietf-dnsop-svcb-https}} provides clients with information about how to reach alternative endpoints for a service, which may have improved performance or privacy properties.  The service is identified by a "scheme" indicating the service type, a hostname, and optionally other information such as a port number.  A DNS server is often identified only by its IP address (e.g. in DHCP), but in some contexts it can also be identified by a hostname (e.g. "NS" records, manual resolver configuration) and sometimes also a non-default port number.
 
-Use of the SVCB record type requires a mapping document for each service type, indicating how a client for that service can interpret the contents of the SVCB SvcParams.  This document provides the mapping for the "dns" service type, allowing DNS servers to offer alternative endpoints and transports, including encrypted transports like DNS over TLS (DoT) and DNS over HTTPS (DoH).
+Use of the SVCB record type requires a mapping document for each service type, indicating how a client for that service can interpret the contents of the SVCB SvcParams.  This document provides the mapping for the "dns" service type, allowing DNS servers to offer alternative endpoints and transports, including encrypted transports like DNS over TLS (DoT) {{!RFC7858}} and DNS over HTTPS (DoH) {{!RFC8484}}.
 
 # Conventions and Definitions
 
@@ -69,13 +69,13 @@ When the binding authority specifies a non-default port number, Port-Prefix Nami
 
 This key indicates the set of supported protocols ({{Section 6.1 of SVCB}}).  There is no default protocol, so the `no-default-alpn` key does not apply, and the `alpn` key MUST be present.
 
-If the protocol set contains any HTTP versions (e.g. "h2", "h3"), then the record indicates support for DNS over HTTPS {{!DOH=RFC8484}}, and the "dohpath" key MUST be present ({{dohpath}}).  All keys specified for use with the HTTPS record are also permissible, and apply to the resulting HTTP connection.
+If the protocol set contains any HTTP versions (e.g. "h2", "h3"), then the record indicates support for DoH, and the "dohpath" key MUST be present ({{dohpath}}).  All keys specified for use with the HTTPS record are also permissible, and apply to the resulting HTTP connection.
 
 If the protocol set contains protocols with different default ports, and no port key is specified, then protocols are contacted separately on their default ports.  Note that in this configuration, ALPN negotiation does not defend against cross-protocol downgrade attacks.
 
 ## port
 
-This key is used to indicate the target port for connection ({{Section 6.2 of SVCB}}).  If omitted, the client SHALL use the default port for each transport protocol (853 for DNS over TLS {{!DOT=RFC7858}}, 443 for DNS over HTTPS).
+This key is used to indicate the target port for connection ({{Section 6.2 of SVCB}}).  If omitted, the client SHALL use the default port for each transport protocol (853 for DoT, 443 for DoH).
 
 This key is automatically mandatory if present.  (See {{Section 7 of SVCB}} for the definition of "automatically mandatory".)
 
@@ -100,7 +100,7 @@ Future SvcParamKeys may also be applicable.
 
 ## dohpath {#dohpath}
 
-"dohpath" is a single-valued SvcParamKey whose value (both in presentation and wire format) MUST be a URI Template {{!RFC6570}} encoded in UTF-8 {{!RFC3629}}.  If the "alpn" SvcParam indicates support for HTTP, "dohpath" MUST be present.  The URI Template MUST contain a "dns" variable, and MUST be chosen such that the result after DoH template expansion ({{Section 6 of !RFC8484}}) is always a valid and functional ":path" value ({{!RFC7540, Section 8.1.2.3}}).
+"dohpath" is a single-valued SvcParamKey whose value (both in presentation and wire format) MUST be a URI Template {{!RFC6570}} encoded in UTF-8 {{!RFC3629}}.  If the "alpn" SvcParam indicates support for HTTP, "dohpath" MUST be present.  The URI Template MUST contain a "dns" variable, and MUST be chosen such that the result after DoH template expansion ({{Section 6 of !RFC8484}}) is always a valid and functional ":path" value ({{!RFC9113, Section 8.3.1}}).
 
 When using this SVCB record, the client MUST send any DoH requests to the HTTP origin identified by the "https" scheme, the authentication name, and the port from the "port" SvcParam (if present).  HTTP requests MUST be directed to the resource resulting from DoH template expansion of the "dohpath" value.
 
