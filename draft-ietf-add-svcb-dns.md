@@ -100,7 +100,7 @@ Future SvcParamKeys may also be applicable.
 
 ## dohpath {#dohpath}
 
-"dohpath" is a single-valued SvcParamKey whose value (both in presentation and wire format) MUST be a URI Template {{!RFC6570}} encoded in UTF-8 {{!RFC3629}}.  If the "alpn" SvcParam indicates support for HTTP, "dohpath" MUST be present.  The URI Template MUST contain a "dns" variable, and MUST be chosen such that the result after DoH template expansion ({{Section 6 of !RFC8484}}) is always a valid and functional ":path" value ({{!RFC9113, Section 8.3.1}}).
+"dohpath" is a single-valued SvcParamKey whose value (both in presentation and wire format) MUST be a URI Template in relative form ({{!RFC6570, Section 1.1}}) encoded in UTF-8 {{!RFC3629}}.  If the "alpn" SvcParam indicates support for HTTP, "dohpath" MUST be present.  The URI Template MUST contain a "dns" variable, and MUST be chosen such that the result after DoH template expansion ({{Section 6 of !RFC8484}}) is always a valid and functional ":path" value ({{!RFC9113, Section 8.3.1}}).
 
 When using this SVCB record, the client MUST send any DoH requests to the HTTP origin identified by the "https" scheme, the authentication name, and the port from the "port" SvcParam (if present).  HTTP requests MUST be directed to the resource resulting from DoH template expansion of the "dohpath" value.
 
