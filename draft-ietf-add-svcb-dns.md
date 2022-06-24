@@ -50,7 +50,7 @@ when, and only when, they appear in all capitals, as shown here.
 
 # Identities and Names {#identity}
 
-SVCB record names (i.e., QNAMEs) for DNS services are formed using Port-Prefix Naming ({{Section 2.3 of SVCB}}), with a scheme of "dns".  For example, SVCB records for a DNS service identified as "`dns1.example.com`" would be queried at "`_dns.dns1.example.com`".
+SVCB record names (i.e., QNAMEs) for DNS services are formed using Port-Prefix Naming ({{Section 2.3 of SVCB}}), with a scheme of "dns".  For example, SVCB records for a DNS service identified as `dns1.example.com` would be queried at `_dns.dns1.example.com`.
 
 In some use cases, the name used for retrieving these DNS records is different from the server identity used to authenticate the secure transport.  To distinguish between these, this document uses the following terms:
 
@@ -59,15 +59,15 @@ In some use cases, the name used for retrieving these DNS records is different f
 
 ## Special case: non-default ports
 
-Normally, a DNS service is identified by an IP address or a domain name.  When connecting to the service using unencrypted DNS over UDP or TCP, clients use the default port number for DNS (53).  However, in rare cases, a DNS service might be identified by both a name and a port number.  For example, the `dns:` URI scheme {{?DNSURI=RFC4501}} optionally includes an authority, comprised of a host and a port number (with a default of 53).  DNS URIs normally omit the authority, or specify an IP address, but a hostname and non-default port number are allowed.
+Normally, a DNS service is identified by an IP address or a domain name.  When connecting to the service using unencrypted DNS over UDP or TCP, clients use the default port number for DNS (53).  However, in rare cases, a DNS service might be identified by both a name and a port number.  For example, the "`dns:`" URI scheme {{?DNSURI=RFC4501}} optionally includes an authority, comprised of a host and a port number (with a default of 53).  DNS URIs normally omit the authority, or specify an IP address, but a hostname and non-default port number are allowed.
 
-When the binding authority specifies a non-default port number, Port-Prefix Naming places the port number in an additional a prefix on the name.  For example, if the binding authority is "`dns1.example.com:9953`", the client would query for SVCB records at "`_9953._dns.dns1.example.com`".  If two DNS services operating on different port numbers provide different behaviors, this arrangement allows them to preserve the distinction when specifying alternative endpoints.
+When the binding authority specifies a non-default port number, Port-Prefix Naming places the port number in an additional a prefix on the name.  For example, if the binding authority is "`dns1.example.com:9953`", the client would query for SVCB records at `_9953._dns.dns1.example.com`.  If two DNS services operating on different port numbers provide different behaviors, this arrangement allows them to preserve the distinction when specifying alternative endpoints.
 
 # Applicable existing SvcParamKeys
 
 ## alpn
 
-This key indicates the set of supported protocols ({{Section 6.1 of SVCB}}).  There is no default protocol, so the `no-default-alpn` key does not apply, and the `alpn` key MUST be present.
+This key indicates the set of supported protocols ({{Section 6.1 of SVCB}}).  There is no default protocol, so the "`no-default-alpn`" key does not apply, and the "`alpn`" key MUST be present.
 
 If the protocol set contains any HTTP versions (e.g., "h2", "h3"), then the record indicates support for DoH, and the "dohpath" key MUST be present ({{dohpath}}).  All keys specified for use with the HTTPS record are also permissible, and apply to the resulting HTTP connection.
 
@@ -77,9 +77,9 @@ If the protocol set contains protocols with different default ports, and no port
 
 This key is used to indicate the target port for connection ({{Section 6.2 of SVCB}}).  If omitted, the client SHALL use the default port number for each transport protocol (853 for DoT and DoQ, 443 for DoH).
 
-This key is automatically mandatory for this binding.  This means that a client that does not respect the `port` key MUST ignore any SVCB record that contains this key.  (See {{Section 7 of SVCB}} for the definition of "automatically mandatory".)
+This key is automatically mandatory for this binding.  This means that a client that does not respect the "`port`" key MUST ignore any SVCB record that contains this key.  (See {{Section 7 of SVCB}} for the definition of "automatically mandatory".)
 
-Support for the `port` key can be unsafe if the client has implicit elevated access to some network service (e.g., a local service that is inaccessible to remote parties) and that service uses a TCP-based protocol other than TLS.  A hostile DNS server might be able to manipulate this service by causing the client to send a specially crafted TLS SNI or session ticket that can be misparsed as a command or exploit.  To avoid such attacks, clients SHOULD NOT support the `port` key unless one of the following conditions applies:
+Support for the "`port`" key can be unsafe if the client has implicit elevated access to some network service (e.g., a local service that is inaccessible to remote parties) and that service uses a TCP-based protocol other than TLS.  A hostile DNS server might be able to manipulate this service by causing the client to send a specially crafted TLS SNI or session ticket that can be misparsed as a command or exploit.  To avoid such attacks, clients SHOULD NOT support the "`port`" key unless one of the following conditions applies:
 
 * The client is being used with a DNS server that it trusts not attempt this attack.
 * The client is being used in a context where implicit elevated access cannot apply.
@@ -100,11 +100,11 @@ Future SvcParamKeys might also be applicable.
 
 ## dohpath {#dohpath}
 
-"dohpath" is a single-valued SvcParamKey whose value (both in presentation and wire format) MUST be a URI Template in relative form ({{!RFC6570, Section 1.1}}) encoded in UTF-8 {{!RFC3629}}.  If the "alpn" SvcParam indicates support for HTTP, "dohpath" MUST be present.  The URI Template MUST contain a "dns" variable, and MUST be chosen such that the result after DoH template expansion ({{Section 6 of !RFC8484}}) is always a valid and functional ":path" value ({{!RFC9113, Section 8.3.1}}).
+"`dohpath`" is a single-valued SvcParamKey whose value (both in presentation and wire format) MUST be a URI Template in relative form ({{!RFC6570, Section 1.1}}) encoded in UTF-8 {{!RFC3629}}.  If the "`alpn`" SvcParam indicates support for HTTP, "`dohpath`" MUST be present.  The URI Template MUST contain a "`dns`" variable, and MUST be chosen such that the result after DoH template expansion ({{Section 6 of !RFC8484}}) is always a valid and functional "`:path`" value ({{!RFC9113, Section 8.3.1}}).
 
-When using this SVCB record, the client MUST send any DoH requests to the HTTP origin identified by the "https" scheme, the authentication name, and the port from the "port" SvcParam (if present).  HTTP requests MUST be directed to the resource resulting from DoH template expansion of the "dohpath" value.
+When using this SVCB record, the client MUST send any DoH requests to the HTTP origin identified by the "`https`" scheme, the authentication name, and the port from the "`port`" SvcParam (if present).  HTTP requests MUST be directed to the resource resulting from DoH template expansion of the "`dohpath`" value.
 
-Clients SHOULD NOT query for any "HTTPS" RRs when using "dohpath".  Instead, the SvcParams and address records associated with this SVCB record SHOULD be used for the HTTPS connection, with the same semantics as an HTTPS RR.  However, for consistency, service operators SHOULD publish an equivalent HTTPS RR, especially if clients might learn about this DoH service through a different channel.
+Clients SHOULD NOT query for any "HTTPS" RRs when using "`dohpath`".  Instead, the SvcParams and address records associated with this SVCB record SHOULD be used for the HTTPS connection, with the same semantics as an HTTPS RR.  However, for consistency, service operators SHOULD publish an equivalent HTTPS RR, especially if clients might learn about this DoH service through a different channel.
 
 # Limitations
 
@@ -112,7 +112,7 @@ This document is concerned exclusively with the DNS transport, and does not affe
 
 # Examples
 
-* A resolver at "`simple.example`" that supports DNS over TLS on port 853 (implicitly, as this is its default port):
+* A resolver known as `simple.example` that supports DNS over TLS on port 853 (implicitly, as this is its default port):
 
       _dns.simple.example. 7200 IN SVCB 1 simple.example. alpn=dot
 
@@ -121,10 +121,10 @@ This document is concerned exclusively with the DNS transport, and does not affe
       _dns.doh.example. 7200 IN SVCB 1 doh.example. (
             alpn=h2 dohpath=/dns-query{?dns} )
 
-* A resolver at "`resolver.example`" that supports:
+* A resolver known as `resolver.example` that supports:
 
-  * DoT on "`resolver.example`" ports 853 (implicit in record 1) and 8530 (explicit in record 2), with "`resolver.example`" as the Authentication Domain Name,
-  * DoQ on "`resolver.example`" port 853 (record 1),
+  * DoT on `resolver.example` ports 853 (implicit in record 1) and 8530 (explicit in record 2), with "`resolver.example`" as the Authentication Domain Name,
+  * DoQ on `resolver.example` port 853 (record 1),
   * DoH at `https://resolver.example/dns-query{?dns}` (record 1), and
   * an experimental protocol on `fooexp.resolver.example:5353` (record 3):
 
@@ -135,7 +135,7 @@ This document is concerned exclusively with the DNS transport, and does not affe
         _dns.resolver.example.  7200 IN SVCB 3 fooexp (
               port=5353 alpn=foo foo-info=... )
 
-* A nameserver at "`ns.example`" whose service configuration is published on a different domain:
+* A nameserver named `ns.example.` whose service configuration is published on a different domain:
 
       _dns.ns.example. 7200 IN SVCB 0 _dns.ns.nic.example.
 
@@ -153,9 +153,9 @@ This attacker cannot impersonate the secure endpoint, but it can forge a respons
 
 ### Redirection attacks
 
-SVCB-reliant clients always enforce the authentication domain name, but they are still subject to attacks using the transport, port number, and "dohpath" value, which are controlled by this adversary.  By changing these values in the SVCB answers, the adversary can direct DNS queries for $HOSTNAME to any port on $HOSTNAME, and any path on "https://$HOSTNAME".  If the DNS client uses shared TLS or HTTP state, the client could be correctly authenticated (e.g., using a TLS client certificate or HTTP cookie).
+SVCB-reliant clients always enforce the authentication domain name, but they are still subject to attacks using the transport, port number, and "dohpath" value, which are controlled by this adversary.  By changing these values in the SVCB answers, the adversary can direct DNS queries for $HOSTNAME to any port on $HOSTNAME, and any path on "`https://$HOSTNAME`".  If the DNS client uses shared TLS or HTTP state, the client could be correctly authenticated (e.g., using a TLS client certificate or HTTP cookie).
 
-This behavior creates a number of possible attacks for certain server configurations.  For example, if "https://$HOSTNAME/upload" accepts any POST request as a public file upload, the adversary could forge a SVCB record containing `dohpath=/upload{?dns}`.  This would cause the client to upload and publish every query, resulting in unexpected storage costs for the server and privacy loss for the client.  Similarly, if two DoH endpoints are available on the same origin, and the service has designated one of them for use with this specification, this adversary can cause clients to use the other endpoint instead.
+This behavior creates a number of possible attacks for certain server configurations.  For example, if `https://$HOSTNAME/upload` accepts any POST request as a public file upload, the adversary could forge a SVCB record containing `dohpath=/upload{?dns}`.  This would cause the client to upload and publish every query, resulting in unexpected storage costs for the server and privacy loss for the client.  Similarly, if two DoH endpoints are available on the same origin, and the service has designated one of them for use with this specification, this adversary can cause clients to use the other endpoint instead.
 
 To mitigate redirection attacks, a client of this SVCB mapping MUST NOT identify or authenticate itself when performing DNS queries, except to servers that it specifically knows are not vulnerable to such attacks.  If an endpoint sends an invalid response to a DNS query, the client SHOULD NOT send more queries to that endpoint.  Multiple DNS services MUST NOT share a hostname identifier ({{identity}}) unless they are so similar that it is safe to allow an attacker to choose which one is used.
 
