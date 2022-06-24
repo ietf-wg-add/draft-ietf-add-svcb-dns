@@ -124,7 +124,7 @@ This document is concerned exclusively with the DNS transport, and does not affe
 * A resolver at "`resolver.example`" that supports:
 
   * DoT on "`resolver.example`" ports 853 (implicit in record 1) and 8530 (explicit in record 2), with "`resolver.example`" as the Authentication Domain Name,
-  * DoQ on "`resolver.example`" port 853,
+  * DoQ on "`resolver.example`" port 853 (record 1),
   * DoH at `https://resolver.example/dns-query{?dns}` (record 1), and
   * an experimental protocol on `fooexp.resolver.example:5353` (record 3):
 
