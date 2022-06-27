@@ -108,7 +108,13 @@ Clients SHOULD NOT query for any "HTTPS" RRs when using "`dohpath`".  Instead, t
 
 # Limitations
 
-This document is concerned exclusively with the DNS transport, and does not affect or inform the construction or interpretation of DNS messages.  For example, nothing in this document indicates whether the service is intended for use as a recursive or authoritative DNS server.  Clients need to know the intended use of  services based on their context.
+This document is concerned exclusively with the DNS transport, and does not affect or inform the construction or interpretation of DNS messages.  For example, nothing in this document indicates whether the service is intended for use as a recursive or authoritative DNS server.  Clients need to know the intended use of services based on their context.
+
+Not all features of this specification will be applicable or effective in all contexts:
+
+ * If the authentication name is received over an insecure channel (e.g., a glue NS record), this specification cannot prevent the client from connecting to an attacker.
+ * Different transports might prove to be popular for different purposes (e.g., stub resolution vs. iterative resolution).  Implementors are not obligated to implement all the defined transports, although doing so is beneficial for compatibility.
+ * Where resolution speed is a high priority, the SVCB TargetName SHOULD follow the convention described in {{Section 11.2 of !SVCB}}, and the use of AliasMode records ({{Section 2.4.2 of !SVCB}}) is NOT RECOMMENDED.
 
 # Examples
 
