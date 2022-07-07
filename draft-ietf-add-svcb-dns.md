@@ -61,7 +61,7 @@ In some use cases, the name used for retrieving these DNS records is different f
 
 Normally, a DNS service is identified by an IP address or a domain name.  When connecting to the service using unencrypted DNS over UDP or TCP, clients use the default port number for DNS (53).  However, in rare cases, a DNS service might be identified by both a name and a port number.  For example, the "`dns:`" URI scheme {{?DNSURI=RFC4501}} optionally includes an authority, comprised of a host and a port number (with a default of 53).  DNS URIs normally omit the authority, or specify an IP address, but a hostname and non-default port number are allowed.
 
-When the binding authority specifies a non-default port number, Port-Prefix Naming places the port number in an additional a prefix on the name.  For example, if the binding authority is "`dns1.example.com:9953`", the client would query for SVCB records at `_9953._dns.dns1.example.com`.  If two DNS services operating on different port numbers provide different behaviors, this arrangement allows them to preserve the distinction when specifying alternative endpoints.
+When the binding authority specifies a non-default port number, Port-Prefix Naming places the port number in an additional prefix on the name.  For example, if the binding authority is "`dns1.example.com:9953`", the client would query for SVCB records at `_9953._dns.dns1.example.com`.  If two DNS services operating on different port numbers provide different behaviors, this arrangement allows them to preserve the distinction when specifying alternative endpoints.
 
 # Applicable existing SvcParamKeys
 
