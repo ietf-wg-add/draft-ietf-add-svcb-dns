@@ -41,6 +41,8 @@ The SVCB resource record type {{!SVCB=I-D.draft-ietf-dnsop-svcb-https}} provides
 
 Use of the SVCB resource record type requires a mapping document for each service type ({{Section 2.4.3 of !SVCB}}), indicating how a client for that service can interpret the contents of the SVCB SvcParams.  This document provides the mapping for the "dns" service type, allowing DNS servers to offer alternative endpoints and transports, including encrypted transports like DNS over TLS (DoT) {{?RFC7858}}, DNS over HTTPS (DoH) {{!RFC8484}}, and DNS over QUIC (DoQ) {{?RFC9250}}.
 
+The SVCB mapping described in this document is intended as a general-purpose baseline.  Subsequent specifications will adapt this mechanism as needed to support specific configurations (e.g., for communication between stub and recursive resolvers).
+
 # Conventions and Definitions
 
 The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD",
