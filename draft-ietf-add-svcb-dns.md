@@ -17,7 +17,7 @@ author:
     ins: B. Schwartz
     name: Benjamin Schwartz
     organization: Google LLC
-    email: bemasc@google.com
+    email: ietf@bemasc.net
 
 normative:
   RFC2119:
@@ -69,7 +69,7 @@ When the binding authority specifies a non-default port number, Port-Prefix Nami
 
 ## alpn
 
-This key indicates the set of supported protocols ({{Section 6.1 of SVCB}}).  There is no default protocol, so the "`no-default-alpn`" key does not apply, and the "`alpn`" key MUST be present.
+This key indicates the set of supported protocols ({{Section 7.1 of SVCB}}).  There is no default protocol, so the "`no-default-alpn`" key does not apply, and the "`alpn`" key MUST be present.
 
 If the protocol set contains any HTTP versions (e.g., "h2", "h3"), then the record indicates support for DoH, and the "dohpath" key MUST be present ({{dohpath}}).  All keys specified for use with the HTTPS record are also permissible, and apply to the resulting HTTP connection.
 
@@ -77,9 +77,9 @@ If the protocol set contains protocols with different default ports, and no port
 
 ## port
 
-This key is used to indicate the target port for connection ({{Section 6.2 of SVCB}}).  If omitted, the client SHALL use the default port number for each transport protocol (853 for DoT and DoQ, 443 for DoH).
+This key is used to indicate the target port for connection ({{Section 7.2 of SVCB}}).  If omitted, the client SHALL use the default port number for each transport protocol (853 for DoT and DoQ, 443 for DoH).
 
-This key is automatically mandatory for this binding.  This means that a client that does not respect the "`port`" key MUST ignore any SVCB record that contains this key.  (See {{Section 7 of SVCB}} for the definition of "automatically mandatory".)
+This key is automatically mandatory for this binding.  This means that a client that does not respect the "`port`" key MUST ignore any SVCB record that contains this key.  (See {{Section 8 of SVCB}} for the definition of "automatically mandatory".)
 
 Support for the "`port`" key can be unsafe if the client has implicit elevated access to some network service (e.g., a local service that is inaccessible to remote parties) and that service uses a TCP-based protocol other than TLS.  A hostile DNS server might be able to manipulate this service by causing the client to send a specially crafted TLS SNI or session ticket that can be misparsed as a command or exploit.  To avoid such attacks, clients SHOULD NOT support the "`port`" key unless one of the following conditions applies:
 
@@ -92,7 +92,6 @@ Support for the "`port`" key can be unsafe if the client has implicit elevated a
 These SvcParamKeys from {{SVCB}} apply to the "dns" scheme without modification:
 
 * mandatory
-* ech
 * ipv4hint
 * ipv6hint
 
@@ -116,7 +115,7 @@ Not all features of this specification will be applicable or effective in all co
 
  * If the authentication name is received over an insecure channel (e.g., a glue NS record), this specification cannot prevent the client from connecting to an attacker.
  * Different transports might prove to be popular for different purposes (e.g., stub resolution vs. iterative resolution).  Implementors are not obligated to implement all the defined transports, although doing so is beneficial for compatibility.
- * Where resolution speed is a high priority, the SVCB TargetName SHOULD follow the convention described in {{Section 11.2 of !SVCB}}, and the use of AliasMode records ({{Section 2.4.2 of !SVCB}}) is NOT RECOMMENDED.
+ * Where resolution speed is a high priority, the SVCB TargetName SHOULD follow the convention described in {{Section 10.2 of !SVCB}}, and the use of AliasMode records ({{Section 2.4.2 of !SVCB}}) is NOT RECOMMENDED.
 
 # Examples
 
