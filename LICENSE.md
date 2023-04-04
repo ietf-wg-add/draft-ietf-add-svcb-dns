@@ -1,4 +1,4 @@
 # License
 
 See the
-[guidelines for contributions](https://github.com/bemasc/svcb-dns/blob/main/CONTRIBUTING.md).
+[guidelines for contributions](https://github.com/ietf-wg-add/draft-ietf-add-svcb-dns/blob/main/CONTRIBUTING.md).
