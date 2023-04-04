@@ -114,7 +114,7 @@ This document is concerned exclusively with the DNS transport, and does not affe
 Not all features of this specification will be applicable or effective in all contexts:
 
  * If the authentication name is received over an insecure channel (e.g., a glue NS record), this specification cannot prevent the client from connecting to an attacker.
- * Different transports might prove to be popular for different purposes (e.g., stub resolution vs. iterative resolution).  Implementors are not obligated to implement all the defined transports, although doing so is beneficial for compatibility.
+ * Different transports might prove to be popular for different purposes (e.g., querying a recursive resolver vs. an authoritative server).  Implementors are not obligated to implement all the defined transports, although doing so is beneficial for compatibility.
  * Where resolution speed is a high priority, the SVCB TargetName SHOULD follow the convention described in {{Section 10.2 of !SVCB}}, and the use of AliasMode records ({{Section 2.4.2 of !SVCB}}) is NOT RECOMMENDED.
 
 # Examples
@@ -132,15 +132,13 @@ Not all features of this specification will be applicable or effective in all co
 
   * DoT on `resolver.example` ports 853 (implicit in record 1) and 8530 (explicit in record 2), with "`resolver.example`" as the Authentication Domain Name,
   * DoQ on `resolver.example` port 853 (record 1),
-  * DoH at `https://resolver.example/dns-query{?dns}` (record 1), and
+  * DoH at `https://resolver.example/q{?dns}` (record 1), and
   * an experimental protocol on `fooexp.resolver.example:5353` (record 3):
 
-        _dns.resolver.example.  7200 IN SVCB 1 resolver.example. (
-            alpn=dot,doq,h2,h3 dohpath=/dns-query{?dns} )
-        _dns.resolver.example.  7200 IN SVCB 2 resolver.example. (
-            alpn=dot port=8530 )
-        _dns.resolver.example.  7200 IN SVCB 3 fooexp (
-              port=5353 alpn=foo foo-info=... )
+        _dns.resolver.example.  7200 IN \
+          SVCB 1 resolver.example. alpn=dot,doq,h2,h3 dohpath=/q{?dns}
+          SVCB 2 resolver.example. alpn=dot port=8530
+          SVCB 3 fooexp.resolver.example. port=5353 alpn=foo foo-info=...
 
 * A nameserver named `ns.example.` whose service configuration is published on a different domain:
 
