@@ -69,7 +69,7 @@ When the binding authority specifies a non-default port number, Port-Prefix Nami
 
 ## alpn
 
-This key indicates the set of supported protocols ({{Section 7.1 of SVCB}}).  There is no default protocol, so the "`no-default-alpn`" key does not apply, and the "`alpn`" key MUST be present.
+This key indicates the set of supported protocols ({{Section 7.1 of SVCB}}).  There is no default protocol, so the "`no-default-alpn`" key does not apply.  If the "`alpn`" SvcParamKey is absent, the client MUST treat the SVCB record as "incompatible" (see {{Section 8 of !I-D.draft-ietf-dnsop-svcb-https}}) unless some other recognized SvcParam indicates a supported protocol.
 
 If the protocol set contains any HTTP versions (e.g., "h2", "h3"), then the record indicates support for DoH, and the "dohpath" key MUST be present ({{dohpath}}).  All keys specified for use with the HTTPS record are also permissible, and apply to the resulting HTTP connection.
 
@@ -196,7 +196,7 @@ This table serves as a non-normative summary of the DNS mapping for SVCB.
 | **Mapped scheme**                | "dns"                                  |
 | **RR type**                      | SVCB (64)                              |
 | **Name prefix**                  | `_dns` for port 53, else `_$PORT._dns` |
-| **Required keys**                | `alpn`                                 |
+| **Required keys**                | `alpn` or equivalent                   |
 | **Automatically Mandatory Keys** | `port`                                 |
 | **Special behaviors**            | Supports all HTTPS RR SvcParamKeys     |
 |                                  | Overrides the HTTPS RR for DoH         |
