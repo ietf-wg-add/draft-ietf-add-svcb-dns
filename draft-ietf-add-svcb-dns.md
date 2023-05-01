@@ -162,7 +162,7 @@ SVCB-reliant clients always enforce the authentication domain name, but they are
 
 This behavior creates a number of possible attacks for certain server configurations.  For example, if `https://$HOSTNAME/upload` accepts any POST request as a public file upload, the adversary could forge a SVCB record containing `dohpath=/upload{?dns}`.  This would cause the client to upload and publish every query, resulting in unexpected storage costs for the server and privacy loss for the client.  Similarly, if two DoH endpoints are available on the same origin, and the service has designated one of them for use with this specification, this adversary can cause clients to use the other endpoint instead.
 
-To mitigate redirection attacks, a client of this SVCB mapping MUST NOT identify or authenticate itself when performing DNS queries, except to servers that it specifically knows are not vulnerable to such attacks.  If an endpoint sends an invalid response to a DNS query, the client SHOULD NOT send more queries to that endpoint.  Multiple DNS services MUST NOT share a hostname identifier ({{identity}}) unless they are so similar that it is safe to allow an attacker to choose which one is used.
+To mitigate redirection attacks, a client of this SVCB mapping MUST NOT identify or authenticate itself when performing DNS queries, except to servers that it specifically knows are not vulnerable to such attacks.  If an endpoint sends an invalid response to a DNS query, the client SHOULD NOT send more queries to that endpoint and MAY log this error.  Multiple DNS services MUST NOT share a hostname identifier ({{identity}}) unless they are so similar that it is safe to allow an attacker to choose which one is used.
 
 ## Adversary on the transport path
 
