@@ -1,0 +1,1071 @@
+{
+  "magic": "E!vIA5L86J2I",
+  "timestamp": "2023-05-02T01:15:52.939174+00:00",
+  "repo": "ietf-wg-add/draft-ietf-add-svcb-dns",
+  "labels": [
+    {
+      "name": "bug",
+      "description": "Something isn't working",
+      "color": "d73a4a"
+    },
+    {
+      "name": "documentation",
+      "description": "Improvements or additions to documentation",
+      "color": "0075ca"
+    },
+    {
+      "name": "duplicate",
+      "description": "This issue or pull request already exists",
+      "color": "cfd3d7"
+    },
+    {
+      "name": "enhancement",
+      "description": "New feature or request",
+      "color": "a2eeef"
+    },
+    {
+      "name": "good first issue",
+      "description": "Good for newcomers",
+      "color": "7057ff"
+    },
+    {
+      "name": "help wanted",
+      "description": "Extra attention is needed",
+      "color": "008672"
+    },
+    {
+      "name": "invalid",
+      "description": "This doesn't seem right",
+      "color": "e4e669"
+    },
+    {
+      "name": "question",
+      "description": "Further information is requested",
+      "color": "d876e3"
+    },
+    {
+      "name": "wontfix",
+      "description": "This will not be worked on",
+      "color": "ffffff"
+    }
+  ],
+  "issues": [
+    {
+      "number": 9,
+      "id": "I_kwDOEO8pQ84-dJyz",
+      "title": "Take a closer look at variable behavior based on dohpath",
+      "url": "https://github.com/ietf-wg-add/draft-ietf-add-svcb-dns/issues/9",
+      "state": "CLOSED",
+      "author": "bemasc",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "The current text says\r\n\r\n> a DoH service operator MUST ensure that all unauthenticated DoH requests to its origin maintain the DoH service's privacy guarantees, regardless of the path\r\n\r\nAs @ekr pointed out in the ADD meeting, there are other causes for concern.  For example, an attacker might be able to change the dohpath from `/dns-query-filtered` to `/dns-query-unfiltered`, bypassing resolver-side protections.",
+      "createdAt": "2021-11-08T19:18:01Z",
+      "updatedAt": "2022-02-01T15:34:57Z",
+      "closedAt": "2022-02-01T15:34:57Z",
+      "comments": [
+        {
+          "author": "bemasc",
+          "authorAssociation": "COLLABORATOR",
+          "body": "An important wrinkle here is that these concerns only apply in \"SVCB-required\" contexts.  If the presence of a SVCB record is optional, then these concerns are moot: an adversary who can modify the SVCB record can also delete it, leaving all traffic in plaintext.",
+          "createdAt": "2021-11-08T21:47:07Z",
+          "updatedAt": "2021-11-08T21:47:07Z"
+        }
+      ]
+    },
+    {
+      "number": 10,
+      "id": "I_kwDOEO8pQ85DOVb3",
+      "title": "Consider cross-protocol confusion attacks",
+      "url": "https://github.com/ietf-wg-add/draft-ietf-add-svcb-dns/issues/10",
+      "state": "CLOSED",
+      "author": "bemasc",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [
+        "bemasc"
+      ],
+      "labels": [],
+      "body": "Allowing the use of nonstandard port numbers in SVCB for DNS provides valuable operational flexibility, but it also creates a risk related to cross-protocol confusion attacks, in which a malicious server convinces a client to send TCP contents that can be misparsed as a different protocol by a non-TLS victim server.  For example, a malicious DNS server could indicate an SNI or session ticket that can be misparsed as a command by a recipient server, and use DNS rebinding to change its own apparent IP address to the victim server.  Clients would then send this server-controlled payload to the victim server.  This is dangerous if the client is implicitly authorized to control the victim server (e.g. authorization by IP address).\r\n\r\nNote that only DoT and DoH (over TCP) are amenable to these attacks.  QUIC Initial encryption ensures that the packet has no meaning to a recipient that is not QUIC-aware, and any QUIC-aware recipient should not be vulnerable to these attacks.\r\n\r\nWe should consider ways to minimize the impact of these attacks.  For example, we could require clients to restrict the value of the `port` parameter to a small fixed list, or refer to the [WHATWG bad port list](https://fetch.spec.whatwg.org/#port-blocking).\r\n\r\nCredit to @davidben\r\n\r\n",
+      "createdAt": "2022-02-08T22:36:03Z",
+      "updatedAt": "2022-03-25T14:52:53Z",
+      "closedAt": "2022-03-25T14:52:53Z",
+      "comments": []
+    },
+    {
+      "number": 13,
+      "id": "I_kwDOEO8pQ85FLnr5",
+      "title": "DoH URI Template construction ",
+      "url": "https://github.com/ietf-wg-add/draft-ietf-add-svcb-dns/issues/13",
+      "state": "CLOSED",
+      "author": "chris-wood",
+      "authorAssociation": "NONE",
+      "assignees": [
+        "bemasc",
+        "chris-wood"
+      ],
+      "labels": [],
+      "body": "The DoH URI Template algorithm currently works like so:\r\n\r\n```\r\n... clients MAY construct a DNS over HTTPS URI Template as follows:\r\n   1.  Let $HOST be the authentication name encoded as a \"host\" value ([Section 3.2.2 of [RFC3986]](https://datatracker.ietf.org/doc/html/rfc3986#section-3.2.2)).\r\n   2.  Let $PORT be the port from the \"port\" key if present, otherwise 443.  (The binding authority's port number MUST NOT be used.)\r\n   3.  Let $DOHPATH be the \"dohpath\" value, decoded from UTF-8.\r\n   4.  The DNS over HTTPS URI Template is \"https://$HOST:$PORT$DOHPATH\".\r\n```\r\n\r\nwhere $DOHPATH is \"a URI Template [[RFC6570](https://datatracker.ietf.org/doc/html/rfc6570)] encoded in UTF-8 [[RFC3629](https://datatracker.ietf.org/doc/html/rfc3629)].\"\r\n\r\nThis seems not restrictive enough. For example, a valid $DOHPATH template could be \"https://dnsserver.example.net/dns-query{?dns},\" and following the algorithm above would yield \"https://dnsserver.example.net:443https://dnsserver.example.net/dns-query{?dns},\" which obviously seems like not the intended result. \r\n\r\nThere's text that says \"The \"dohpath\" value MUST be chosen such that the resulting URI Template is valid for use with DNS over HTTPS,\" but note that the algorithm above is presented with the word MAY which, to me, implies that clients could construct the URI Template some other way. \r\n\r\nUnless there's a good reason to do so, we should be more restrictive with what $DOHPATH contains (it might be just a path component of a URI Template, or something), and how clients construct the Template. ",
+      "createdAt": "2022-03-06T17:54:02Z",
+      "updatedAt": "2022-04-22T17:50:29Z",
+      "closedAt": "2022-04-22T17:50:29Z",
+      "comments": [
+        {
+          "author": "bemasc",
+          "authorAssociation": "COLLABORATOR",
+          "body": "> There's text that says \"The \"dohpath\" value MUST be chosen such that the resulting URI Template is valid for use with DNS over HTTPS,\"\r\n\r\nYes.  Surely this normatively constrains the value in the way you're asking?\r\n\r\n> but note that the algorithm above is presented with the word MAY which, to me, implies that clients could construct the URI Template some other way.\r\n\r\nYes.  People don't like it when you normatively require implementation of a specific algorithm, because it artificially constrains implementation.  In this case, for example, a client could choose to omit the port number when it is unspecified, instead of setting it explicitly to 443.  This would undeniably result in a different DoH URI Template, although the resulting calculated URIs for each request would be equivalent in some sense.  A client could even skip computation of the full URI template, and instead perform substitution for each request directly on the `$DOHPATH` string, plugging `$HOST` and `$PORT` and the path into their HTTP client library without ever constructing a URI.",
+          "createdAt": "2022-03-07T15:49:01Z",
+          "updatedAt": "2022-03-07T15:50:31Z"
+        },
+        {
+          "author": "bemasc",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Maybe it would be better to say that `dohpath` is a URI template that expands to the [path](https://datatracker.ietf.org/doc/html/rfc3986#section-3.3) for each HTTP request, and remove the discussion about forming a full URL?",
+          "createdAt": "2022-04-12T01:44:09Z",
+          "updatedAt": "2022-04-12T01:44:09Z"
+        }
+      ]
+    },
+    {
+      "number": 14,
+      "id": "I_kwDOEO8pQ85FLn6E",
+      "title": "Include examples for dohpath -> URI Template construction",
+      "url": "https://github.com/ietf-wg-add/draft-ietf-add-svcb-dns/issues/14",
+      "state": "CLOSED",
+      "author": "chris-wood",
+      "authorAssociation": "NONE",
+      "assignees": [
+        "chris-wood"
+      ],
+      "labels": [],
+      "body": "[Section 5.1](https://datatracker.ietf.org/doc/html/draft-ietf-add-svcb-dns-02#section-5.1) has a good amount of information, but could be improved if there were examples showing how one constructs a URI Template from the relevant $HOST, $PORT, and $DOHPATH parameters. These examples might also include parameters that would yield invalid URLs. [Section 7](https://datatracker.ietf.org/doc/html/draft-ietf-add-svcb-dns-02#section-7) has some examples for the RR contents, as derived from a URI Template, but not how to use those contents to construct URI Templates. ",
+      "createdAt": "2022-03-06T17:58:22Z",
+      "updatedAt": "2022-04-22T17:51:16Z",
+      "closedAt": "2022-04-22T17:51:15Z",
+      "comments": [
+        {
+          "author": "bemasc",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Section 7 does include an example of `dohpath` to DoH URI Template construction.\r\n\r\nFeel free to propose additional examples if there's a case you think is worth covering.",
+          "createdAt": "2022-03-07T16:00:35Z",
+          "updatedAt": "2022-03-07T16:00:35Z"
+        },
+        {
+          "author": "bemasc",
+          "authorAssociation": "COLLABORATOR",
+          "body": "I've changed the description to remove these variables, so hopefully this is now addressed.",
+          "createdAt": "2022-04-22T17:51:15Z",
+          "updatedAt": "2022-04-22T17:51:15Z"
+        }
+      ]
+    },
+    {
+      "number": 15,
+      "id": "I_kwDOEO8pQ85FLobU",
+      "title": "Redirection attacks and TLS contexts",
+      "url": "https://github.com/ietf-wg-add/draft-ietf-add-svcb-dns/issues/15",
+      "state": "CLOSED",
+      "author": "chris-wood",
+      "authorAssociation": "NONE",
+      "assignees": [
+        "bemasc",
+        "chris-wood"
+      ],
+      "labels": [],
+      "body": "[Section 8.1.2](https://datatracker.ietf.org/doc/html/draft-ietf-add-svcb-dns-02#section-8.1.2) recommends that clients mitigate redirection attacks by not using client authentication to DNS resolvers. Perhaps a better approach would be to not use a TLS context or association that is used for other purposes, regardless of whether that context uses client authentication.",
+      "createdAt": "2022-03-06T18:07:13Z",
+      "updatedAt": "2022-04-22T17:50:46Z",
+      "closedAt": "2022-04-22T17:50:46Z",
+      "comments": [
+        {
+          "author": "bemasc",
+          "authorAssociation": "COLLABORATOR",
+          "body": "I don't think that is sufficient.  The attack does not depend on the client authentication being shared with another context.  For example, if I rewrite the `dohpath` to be `/upload`, and this triggers an HTTP Basic Authentication response that causes the client software to pop up a username+password prompt, the user might log in and enable the attack.",
+          "createdAt": "2022-03-07T15:29:25Z",
+          "updatedAt": "2022-03-07T15:29:25Z"
+        },
+        {
+          "author": "chris-wood",
+          "authorAssociation": "NONE",
+          "body": "There are lots of ways connection state could be misused here. For example, what if the new DNS query is sent over a connection that uses cookies? What if the DNS query resumes a previously established TLS connection that used some application layer authentication? Basically, this text\r\n\r\n```\r\nTo mitigate redirection attacks, a client of this SVCB mapping MUST NOT provide client authentication for DNS queries...\r\n```\r\n\r\nseems not quite right, since it seems to focus on TLS-layer things. I recommend further refining to make it clear what is expected of this new connection. I'm happy to propose a PR to clarify my thinking, if that would be useful.",
+          "createdAt": "2022-03-07T15:35:23Z",
+          "updatedAt": "2022-03-07T15:35:23Z"
+        },
+        {
+          "author": "bemasc",
+          "authorAssociation": "COLLABORATOR",
+          "body": "\"Client authentication\" in this text is not intended to to be limited to TLS.  It applies to any form of client authentication in any protocol, including HTTP.",
+          "createdAt": "2022-03-07T15:36:54Z",
+          "updatedAt": "2022-03-07T15:36:54Z"
+        },
+        {
+          "author": "chris-wood",
+          "authorAssociation": "NONE",
+          "body": "Great -- I'll propose text!",
+          "createdAt": "2022-03-07T15:37:45Z",
+          "updatedAt": "2022-03-07T15:37:45Z"
+        },
+        {
+          "author": "bemasc",
+          "authorAssociation": "COLLABORATOR",
+          "body": "I've added a small change to #17 that tries to clarify this requirement.",
+          "createdAt": "2022-04-22T17:08:46Z",
+          "updatedAt": "2022-04-22T17:08:46Z"
+        }
+      ]
+    },
+    {
+      "number": 16,
+      "id": "I_kwDOEO8pQ85FLoiW",
+      "title": "Unclear privacy and security requirement",
+      "url": "https://github.com/ietf-wg-add/draft-ietf-add-svcb-dns/issues/16",
+      "state": "CLOSED",
+      "author": "chris-wood",
+      "authorAssociation": "NONE",
+      "assignees": [
+        "bemasc"
+      ],
+      "labels": [],
+      "body": "[Section 8.1.2](https://datatracker.ietf.org/doc/html/draft-ietf-add-svcb-dns-02#section-8.1.2) currently says:\r\n\r\n```\r\nDNS services that are\r\n   identified by a hostname ([Section 3](https://datatracker.ietf.org/doc/html/draft-ietf-add-svcb-dns-02#section-3)) MUST ensure that all\r\n   unauthenticated DNS requests to that name receive any promised\r\n   privacy and security guarantees, regardless of transport, port\r\n   number, or HTTP path.\r\n```\r\n\r\nThis MUST seems strange. Is this just saying \"don't do silly or otherwise bad things with client queries\"? I'm not sure that's something we need normative language for here, so unless there's a particular behavior that this is meant to require (or prohibit), I'd recommend removing it.",
+      "createdAt": "2022-03-06T18:08:59Z",
+      "updatedAt": "2022-04-22T17:50:18Z",
+      "closedAt": "2022-04-22T17:50:18Z",
+      "comments": [
+        {
+          "author": "bemasc",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Suppose `https://example.com/dns-query{?dns}` is your consumer-facing endpoint with limited logging, and `https://example.com/debug{?dns}` is a debug endpoint that drops all queries into a log that's accessible to your whole engineering staff.  The point of this sentence is that, if this is your configuration, you can't promise users the limited logging on the consumer-facing endpoint, because any intermediary could flip users onto the debug endpoint, causing you to violate your own promise.  You need to move these endpoints onto separate hostnames.  Separate paths, port numbers, or even separate ALPNs, is not sufficient, because an attacker can steer the user between them.",
+          "createdAt": "2022-03-07T15:35:33Z",
+          "updatedAt": "2022-03-07T15:35:46Z"
+        },
+        {
+          "author": "chris-box",
+          "authorAssociation": "NONE",
+          "body": "I agree the original text was unclear unless you're already familiar with the problem. I wasn't. However Ben's response above DID make sense to me, so it would be good to use some of it.",
+          "createdAt": "2022-03-11T17:48:54Z",
+          "updatedAt": "2022-03-11T17:48:54Z"
+        }
+      ]
+    },
+    {
+      "number": 19,
+      "id": "I_kwDOEO8pQ85LxMGt",
+      "title": "dohpath is a URI Template",
+      "url": "https://github.com/ietf-wg-add/draft-ietf-add-svcb-dns/issues/19",
+      "state": "CLOSED",
+      "author": "tfpauly",
+      "authorAssociation": "CONTRIBUTOR",
+      "assignees": [],
+      "labels": [],
+      "body": "Section 5.1 says this:\r\n\r\n> \"dohpath\" is a single-valued SvcParamKey whose value (both in presentation and wire format) MUST be a URI Template [[RFC6570](https://datatracker.ietf.org/doc/html/rfc6570)] encoded in UTF-8 [[RFC3629](https://datatracker.ietf.org/doc/html/rfc3629)].\r\n\r\nThe examples are all like this:\r\n\r\n>       _dns.doh.example. 7200 IN SVCB 1 doh.example. ( alpn=h2 dohpath=/dns-query{?dns} )\r\n\r\nRFC 6570 says this:\r\n\r\n>    A URI Template may be provided in absolute form, as in the examples above, or in relative form.  A template is expanded before the resulting reference is resolved from relative to absolute form.\r\n\r\nI assume that we don't want `dohpath=https://doh.example/dns-query{?dns}` passed in the SVCB record. Should we clarify that `dohpath` MUST be in relative form, i.e., just the path portion of the URI?",
+      "createdAt": "2022-06-14T18:23:28Z",
+      "updatedAt": "2022-06-21T18:58:38Z",
+      "closedAt": "2022-06-21T18:58:38Z",
+      "comments": [
+        {
+          "author": "bemasc",
+          "authorAssociation": "COLLABORATOR",
+          "body": "As a normative matter, I think this is already settled in the text, but I'm happy to improve clarity of the description.",
+          "createdAt": "2022-06-14T18:37:44Z",
+          "updatedAt": "2022-06-14T18:37:44Z"
+        },
+        {
+          "author": "tfpauly",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "Yeah, I think this technically covers it (`result after DoH template expansion Section 6 of RFC8484 is always a valid and functional \":path\" value`), but it would be nice to say something at the start of the paragraph to specify that this is just a path segment of the URL.",
+          "createdAt": "2022-06-14T22:25:42Z",
+          "updatedAt": "2022-06-14T22:25:42Z"
+        }
+      ]
+    },
+    {
+      "number": 22,
+      "id": "I_kwDOEO8pQ85Nxd0m",
+      "title": "Clarify relationship to DNS server type in introduction",
+      "url": "https://github.com/ietf-wg-add/draft-ietf-add-svcb-dns/issues/22",
+      "state": "CLOSED",
+      "author": "enygren",
+      "authorAssociation": "NONE",
+      "assignees": [],
+      "labels": [],
+      "body": "It would help readability if the introduction (and perhaps abstract) mentioned that this applies\r\nto both Recursive and Authoritative DNS Servers and that the mechanism\r\nfor knowing when to use one of these records will vary and will be defined\r\nin other drafts.\r\n\r\nI think this aligns with Martin D\u00fcrst's feedback as well in the ART review:\r\n\r\n> The main issue with the document is that there is no explanation on\r\n> who/where/when this information is to be queried and used. Is this the job of\r\n> an application (e.g. a web browser or an email user agent)? Is this the job of\r\n> a resolver in an OS? Is it the job of DNS libraries, e.g. in programming\r\n> languages such as Ruby and Python? Who/what decides which of the alternatives\r\n> is used if there are multiple? How should (or shouldn't) DNS queries for SVCB\r\n> records be combined with queries for other records?\r\n> \r\n> While I understand that there may be many different contexts, a pointer to a\r\n> document describing various potential scenarios or so could help a lot.\r\n\r\n\r\nPerhaps something in the introduction along the lines of:\r\n\r\nThis document only specifies a generic mapping for the DNS protocol to SVCB records, \r\nin a way that applies to both Recursive and Authoritative DNS Servers.  \r\nHow these are provisioned and additional requirements on client behavior\r\n(such as discovery for Recursive DNS and DNSSEC for Authoritative DNS) \r\nwill be covered in subsequent specifications.\r\n\r\n",
+      "createdAt": "2022-07-14T13:45:43Z",
+      "updatedAt": "2022-08-12T06:45:34Z",
+      "closedAt": "2022-08-12T06:45:34Z",
+      "comments": []
+    },
+    {
+      "number": 23,
+      "id": "I_kwDOEO8pQ85itHkA",
+      "title": "Consider relaxing the ALPN rule",
+      "url": "https://github.com/ietf-wg-add/draft-ietf-add-svcb-dns/issues/23",
+      "state": "CLOSED",
+      "author": "bemasc",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [
+        "bemasc"
+      ],
+      "labels": [],
+      "body": "We can make the ALPN rule less specific to allow more room for new security protocols.  See [here](https://mailarchive.ietf.org/arch/msg/add/-K-Dk8K1B8CBXpmlRkg0SK-U1kk/).",
+      "createdAt": "2023-04-05T17:05:01Z",
+      "updatedAt": "2023-05-01T17:58:49Z",
+      "closedAt": "2023-05-01T17:58:49Z",
+      "comments": []
+    }
+  ],
+  "pulls": [
+    {
+      "number": 1,
+      "id": "MDExOlB1bGxSZXF1ZXN0NjA2MjI5NDU2",
+      "title": "clarify that the default port of 53 does not get a _port prefix",
+      "url": "https://github.com/ietf-wg-add/draft-ietf-add-svcb-dns/pull/1",
+      "state": "MERGED",
+      "author": "Habbie",
+      "authorAssociation": "CONTRIBUTOR",
+      "assignees": [],
+      "labels": [],
+      "body": "Hey Ben,\r\n\r\nI know the SVCB spec defines this clearly, but I hope you'll feel that this additional sentence strikes a nice balance that can help future readers that, like me, had to dig a bit to un-confuse themselves.\r\n\r\nRegards, Peter van Dijk",
+      "createdAt": "2021-03-31T19:33:59Z",
+      "updatedAt": "2021-03-31T20:14:02Z",
+      "baseRepository": "ietf-wg-add/draft-ietf-add-svcb-dns",
+      "baseRefName": "main",
+      "baseRefOid": "a316346d88711f5021461519c53d46d1e5d10e77",
+      "headRepository": "PowerDNS/svcb-dns",
+      "headRefName": "clarify-default-53",
+      "headRefOid": "14320a822f41c72123b0ca00dd286e301ab3f5d2",
+      "closedAt": "2021-03-31T19:48:30Z",
+      "mergedAt": "2021-03-31T19:48:30Z",
+      "mergedBy": "bemasc",
+      "mergeCommit": {
+        "oid": "cf5d6c62e5bee107fa6106a56e8db649b98af990"
+      },
+      "comments": [
+        {
+          "author": "bemasc",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Thanks for the clarification!",
+          "createdAt": "2021-03-31T19:48:27Z",
+          "updatedAt": "2021-03-31T19:48:27Z"
+        }
+      ],
+      "reviews": []
+    },
+    {
+      "number": 2,
+      "id": "MDExOlB1bGxSZXF1ZXN0NjEyNjE4OTg5",
+      "title": "Remove the default protocol",
+      "url": "https://github.com/ietf-wg-add/draft-ietf-add-svcb-dns/pull/2",
+      "state": "MERGED",
+      "author": "bemasc",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "This change removes the default protocol, which is currently DNS over\r\nTLS (\"dot\").  Several readers have expressed concern that this default\r\nis confusing.",
+      "createdAt": "2021-04-09T17:24:53Z",
+      "updatedAt": "2021-04-19T18:32:59Z",
+      "baseRepository": "ietf-wg-add/draft-ietf-add-svcb-dns",
+      "baseRefName": "main",
+      "baseRefOid": "3e6614d859355a96bc459bc8c4269d13f1d330e9",
+      "headRepository": "ietf-wg-add/draft-ietf-add-svcb-dns",
+      "headRefName": "bemasc-empty-set",
+      "headRefOid": "d1caaebacdb21f042d949e46a86d6c11ac7b68f5",
+      "closedAt": "2021-04-19T18:32:56Z",
+      "mergedAt": "2021-04-19T18:32:56Z",
+      "mergedBy": "bemasc",
+      "mergeCommit": {
+        "oid": "9e27e3b8d55b83c81a0fd040634f62f9a570a402"
+      },
+      "comments": [
+        {
+          "author": "bemasc",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Blocked by https://github.com/MikeBishop/dns-alt-svc/pull/314",
+          "createdAt": "2021-04-09T17:25:27Z",
+          "updatedAt": "2021-04-09T17:25:27Z"
+        }
+      ],
+      "reviews": [
+        {
+          "id": "MDE3OlB1bGxSZXF1ZXN0UmV2aWV3NjMyNjk5NzIz",
+          "commit": {
+            "abbreviatedOid": "49ab768"
+          },
+          "author": "Habbie",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "APPROVED",
+          "body": "approved with 1 question",
+          "createdAt": "2021-04-09T18:47:18Z",
+          "updatedAt": "2021-04-09T18:49:56Z",
+          "comments": [
+            {
+              "originalPosition": 14,
+              "body": "Should this be replaced by some text saying `alpn` is simply (not a technical term) mandatory now?",
+              "createdAt": "2021-04-09T18:47:19Z",
+              "updatedAt": "2021-04-19T18:32:36Z"
+            }
+          ]
+        },
+        {
+          "id": "MDE3OlB1bGxSZXF1ZXN0UmV2aWV3NjMyNzE1NDYx",
+          "commit": {
+            "abbreviatedOid": "743c44a"
+          },
+          "author": "bemasc",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2021-04-09T19:10:21Z",
+          "updatedAt": "2021-04-09T19:10:22Z",
+          "comments": [
+            {
+              "originalPosition": 14,
+              "body": "Good point.  Done.",
+              "createdAt": "2021-04-09T19:10:22Z",
+              "updatedAt": "2021-04-19T18:32:36Z"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "number": 3,
+      "id": "MDExOlB1bGxSZXF1ZXN0NjE4ODE4NjI5",
+      "title": "Fix SVCB name/param order",
+      "url": "https://github.com/ietf-wg-add/draft-ietf-add-svcb-dns/pull/3",
+      "state": "MERGED",
+      "author": "mnordhoff",
+      "authorAssociation": "CONTRIBUTOR",
+      "assignees": [],
+      "labels": [],
+      "body": "`TargetName` goes before `SvcParams`: https://tools.ietf.org/html/draft-ietf-dnsop-svcb-https-02#section-2.1\r\n\r\nI'm not sure if putting them in the other order is illegal or just unusual, but either way it would be better to use the typical syntax.\r\n\r\n(How come it spells out the full target name instead of just using \"`.`\"? I think both are functionally equivalent?)",
+      "createdAt": "2021-04-20T01:03:40Z",
+      "updatedAt": "2021-04-20T01:48:56Z",
+      "baseRepository": "ietf-wg-add/draft-ietf-add-svcb-dns",
+      "baseRefName": "main",
+      "baseRefOid": "9e27e3b8d55b83c81a0fd040634f62f9a570a402",
+      "headRepository": "mnordhoff/svcb-dns",
+      "headRefName": "patch-1",
+      "headRefOid": "7c55a7e0e02f782ad18e153d7583e82437098373",
+      "closedAt": "2021-04-20T01:32:38Z",
+      "mergedAt": "2021-04-20T01:32:38Z",
+      "mergedBy": "bemasc",
+      "mergeCommit": {
+        "oid": "25b2e1d3923cac19477dfb4944c9cd996816e57e"
+      },
+      "comments": [
+        {
+          "author": "bemasc",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Thanks!\r\n\r\nIt's spelled out here because the owner name is `_dns.simple.example`, and the TargetName is `simple.example`.",
+          "createdAt": "2021-04-20T01:32:34Z",
+          "updatedAt": "2021-04-20T01:32:34Z"
+        },
+        {
+          "author": "mnordhoff",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "That was fast! Thank you! :)\r\n\r\n> It's spelled out here because the owner name is `_dns.simple.example`, and the `TargetName` is simple.example.\r\n\r\nAh. I don't grok `SVCB` well enough to understand that interaction. (And I'm not sure the SVCB draft has an example...)",
+          "createdAt": "2021-04-20T01:48:56Z",
+          "updatedAt": "2021-04-20T01:48:56Z"
+        }
+      ],
+      "reviews": [
+        {
+          "id": "MDE3OlB1bGxSZXF1ZXN0UmV2aWV3NjM5NDMwMzU4",
+          "commit": {
+            "abbreviatedOid": "7c55a7e"
+          },
+          "author": "bemasc",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2021-04-20T01:31:25Z",
+          "updatedAt": "2021-04-20T01:31:25Z",
+          "comments": []
+        }
+      ]
+    },
+    {
+      "number": 4,
+      "id": "MDExOlB1bGxSZXF1ZXN0NjI1NDIxNTc2",
+      "title": "Don't lock base spec to an old version",
+      "url": "https://github.com/ietf-wg-add/draft-ietf-add-svcb-dns/pull/4",
+      "state": "MERGED",
+      "author": "paulehoffman",
+      "authorAssociation": "CONTRIBUTOR",
+      "assignees": [],
+      "labels": [],
+      "body": "",
+      "createdAt": "2021-04-28T17:28:35Z",
+      "updatedAt": "2021-04-28T17:34:09Z",
+      "baseRepository": "ietf-wg-add/draft-ietf-add-svcb-dns",
+      "baseRefName": "main",
+      "baseRefOid": "b71df7a491e27a07f4f389a111c7c1fa36c448c7",
+      "headRepository": "paulehoffman/svcb-dns",
+      "headRefName": "patch-1",
+      "headRefOid": "d6af8708c447812aaeaa13f83db052ce5efdd2fe",
+      "closedAt": "2021-04-28T17:34:09Z",
+      "mergedAt": "2021-04-28T17:34:09Z",
+      "mergedBy": "bemasc",
+      "mergeCommit": {
+        "oid": "14d374dee15ff4ed13ccd172a9d2e938ee64e31a"
+      },
+      "comments": [],
+      "reviews": [
+        {
+          "id": "MDE3OlB1bGxSZXF1ZXN0UmV2aWV3NjQ3MzQyOTY5",
+          "commit": {
+            "abbreviatedOid": "d6af870"
+          },
+          "author": "bemasc",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2021-04-28T17:34:04Z",
+          "updatedAt": "2021-04-28T17:34:04Z",
+          "comments": []
+        }
+      ]
+    },
+    {
+      "number": 5,
+      "id": "PR_kwDOEO8pQ84tH0FI",
+      "title": "Add some quoting for examples",
+      "url": "https://github.com/ietf-wg-add/draft-ietf-add-svcb-dns/pull/5",
+      "state": "MERGED",
+      "author": "martinthomson",
+      "authorAssociation": "CONTRIBUTOR",
+      "assignees": [],
+      "labels": [],
+      "body": "The lack of quoting in some of the examples might make it harder to see what constitutes example and what is punctuation.  Highlighting and fonts in the HTML rendering are subtle and not present in text renderings (any more).\r\n\r\nI've also changed some section references.  I'm happy to split that off into a different change or use the `{{SVCB, Section 6.2}}` form if you prefer that.",
+      "createdAt": "2021-10-13T05:04:02Z",
+      "updatedAt": "2021-10-13T21:12:05Z",
+      "baseRepository": "ietf-wg-add/draft-ietf-add-svcb-dns",
+      "baseRefName": "main",
+      "baseRefOid": "5882117ba5cb7760210cf1f75a8cf282ae5ee22e",
+      "headRepository": "martinthomson/draft-ietf-add-svcb-dns",
+      "headRefName": "patch-1",
+      "headRefOid": "afec4d3a5236ffa374724f1ca1a638c2bfd4930f",
+      "closedAt": "2021-10-13T21:12:04Z",
+      "mergedAt": "2021-10-13T21:12:04Z",
+      "mergedBy": "bemasc",
+      "mergeCommit": {
+        "oid": "b54fa6c7923285ae4c43f3e855e094df6e618d9c"
+      },
+      "comments": [],
+      "reviews": [
+        {
+          "id": "PRR_kwDOEO8pQ84uaMG6",
+          "commit": {
+            "abbreviatedOid": "afec4d3"
+          },
+          "author": "bemasc",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2021-10-13T13:57:09Z",
+          "updatedAt": "2021-10-13T13:57:09Z",
+          "comments": []
+        }
+      ]
+    },
+    {
+      "number": 6,
+      "id": "PR_kwDOEO8pQ84tNP23",
+      "title": "Increase precision about service names",
+      "url": "https://github.com/ietf-wg-add/draft-ietf-add-svcb-dns/pull/6",
+      "state": "MERGED",
+      "author": "bemasc",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "This should help with the `resolver.arpa` case in DDR.\r\nSee https://github.com/ietf-wg-add/draft-ietf-add-ddr/issues/41",
+      "createdAt": "2021-10-14T15:09:49Z",
+      "updatedAt": "2021-10-21T18:44:22Z",
+      "baseRepository": "ietf-wg-add/draft-ietf-add-svcb-dns",
+      "baseRefName": "main",
+      "baseRefOid": "57b3574167c21ab84ed57592ca25a366536b1404",
+      "headRepository": "ietf-wg-add/draft-ietf-add-svcb-dns",
+      "headRefName": "bemasc-service-name",
+      "headRefOid": "bd4c15e23fa86e78b568aee547443fb0fbd25ebf",
+      "closedAt": "2021-10-21T18:44:14Z",
+      "mergedAt": "2021-10-21T18:44:14Z",
+      "mergedBy": "bemasc",
+      "mergeCommit": {
+        "oid": "ec7307ff600f144594b870a0a3692e7a81c40a60"
+      },
+      "comments": [],
+      "reviews": [
+        {
+          "id": "PRR_kwDOEO8pQ84ulUwd",
+          "commit": {
+            "abbreviatedOid": "a3c57bf"
+          },
+          "author": "martinthomson",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2021-10-18T02:12:29Z",
+          "updatedAt": "2021-10-18T02:12:30Z",
+          "comments": [
+            {
+              "originalPosition": 5,
+              "body": "I had a hard time trying to understand this formulation.  I understand that the goal is to provide unambiguous definitions for key concepts, but this requires a bunch of background knowledge.\r\n\r\nThe next paragraph is much easier to understand.  Consider following that with a clearer definition and explanation of what binding authority is (this reduces to name plus port, assuming that you don't want userinfo as well)\r\n\r\nIncluding an explanation of why you might choose to authenticate the server using a different name is necessary to motivate the inclusion of an \"authentication name\" as a concept.",
+              "createdAt": "2021-10-18T02:12:29Z",
+              "updatedAt": "2021-10-18T02:12:30Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOEO8pQ84uoRa1",
+          "commit": {
+            "abbreviatedOid": "bd4c15e"
+          },
+          "author": "bemasc",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2021-10-18T16:27:29Z",
+          "updatedAt": "2021-10-18T16:27:29Z",
+          "comments": [
+            {
+              "originalPosition": 5,
+              "body": "OK, I've reversed the order and added more explanation.",
+              "createdAt": "2021-10-18T16:27:29Z",
+              "updatedAt": "2021-10-18T16:27:29Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOEO8pQ84upyHB",
+          "commit": {
+            "abbreviatedOid": "bd4c15e"
+          },
+          "author": "martinthomson",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "APPROVED",
+          "body": "Much better.  Thanks for indulging me.",
+          "createdAt": "2021-10-19T01:14:01Z",
+          "updatedAt": "2021-10-19T01:14:01Z",
+          "comments": []
+        }
+      ]
+    },
+    {
+      "number": 7,
+      "id": "PR_kwDOEO8pQ84tSKMr",
+      "title": "made the examples aligned, some minor editing nits",
+      "url": "https://github.com/ietf-wg-add/draft-ietf-add-svcb-dns/pull/7",
+      "state": "MERGED",
+      "author": "moonshiner",
+      "authorAssociation": "CONTRIBUTOR",
+      "assignees": [],
+      "labels": [],
+      "body": "These are really minor, was making all your dns names use the same syntax you started with (\"` `\")\r\n\r\nBut I think the examples should look similar in nature. \r\n\r\n(i'm also thinking of some horrible bad examples to include)",
+      "createdAt": "2021-10-16T23:00:00Z",
+      "updatedAt": "2021-10-21T18:43:52Z",
+      "baseRepository": "ietf-wg-add/draft-ietf-add-svcb-dns",
+      "baseRefName": "main",
+      "baseRefOid": "57b3574167c21ab84ed57592ca25a366536b1404",
+      "headRepository": "moonshiner/draft-ietf-add-svcb-dns",
+      "headRefName": "tjw-examples",
+      "headRefOid": "425c22b482389ed64d1ed29d96ef3bcc2cdb0306",
+      "closedAt": "2021-10-21T18:43:52Z",
+      "mergedAt": "2021-10-21T18:43:52Z",
+      "mergedBy": "bemasc",
+      "mergeCommit": {
+        "oid": "2728b02b25332e9391fa67d09f1e31028353a9df"
+      },
+      "comments": [
+        {
+          "author": "moonshiner",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "agreed - totally missed that. I pushed up the edit if that is easier. ",
+          "createdAt": "2021-10-18T21:16:30Z",
+          "updatedAt": "2021-10-18T21:16:30Z"
+        }
+      ],
+      "reviews": [
+        {
+          "id": "PRR_kwDOEO8pQ84unOuk",
+          "commit": {
+            "abbreviatedOid": "7be89ec"
+          },
+          "author": "bemasc",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2021-10-18T13:13:35Z",
+          "updatedAt": "2021-10-18T13:13:36Z",
+          "comments": [
+            {
+              "originalPosition": 37,
+              "body": "```suggestion\r\n      _dns.ns.example. 7200 IN SVCB 0 _dns.ns.nic.example.\r\n```",
+              "createdAt": "2021-10-18T13:13:36Z",
+              "updatedAt": "2021-10-18T13:13:36Z"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "number": 8,
+      "id": "PR_kwDOEO8pQ84tVjsQ",
+      "title": "Specify the \"dohpath\" parameter more precisely",
+      "url": "https://github.com/ietf-wg-add/draft-ietf-add-svcb-dns/pull/8",
+      "state": "MERGED",
+      "author": "bemasc",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "",
+      "createdAt": "2021-10-18T15:57:52Z",
+      "updatedAt": "2021-10-21T18:53:29Z",
+      "baseRepository": "ietf-wg-add/draft-ietf-add-svcb-dns",
+      "baseRefName": "main",
+      "baseRefOid": "ec7307ff600f144594b870a0a3692e7a81c40a60",
+      "headRepository": "ietf-wg-add/draft-ietf-add-svcb-dns",
+      "headRefName": "bemasc-utf8",
+      "headRefOid": "1957ae57185732c21db0911cf74397642064dfe4",
+      "closedAt": "2021-10-21T18:53:26Z",
+      "mergedAt": "2021-10-21T18:53:26Z",
+      "mergedBy": "bemasc",
+      "mergeCommit": {
+        "oid": "f6105356bccf370e9cf8552a66313b75f240ad25"
+      },
+      "comments": [],
+      "reviews": []
+    },
+    {
+      "number": 11,
+      "id": "PR_kwDOEO8pQ84y030A",
+      "title": "Add text on protocol confusion attacks",
+      "url": "https://github.com/ietf-wg-add/draft-ietf-add-svcb-dns/pull/11",
+      "state": "MERGED",
+      "author": "bemasc",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "Closes https://github.com/ietf-wg-add/draft-ietf-add-svcb-dns/issues/10",
+      "createdAt": "2022-02-15T01:43:27Z",
+      "updatedAt": "2022-03-25T14:52:58Z",
+      "baseRepository": "ietf-wg-add/draft-ietf-add-svcb-dns",
+      "baseRefName": "main",
+      "baseRefOid": "ca81bce35f1d56db918aa48423f8af6f940f5180",
+      "headRepository": "ietf-wg-add/draft-ietf-add-svcb-dns",
+      "headRefName": "bemasc-ports",
+      "headRefOid": "5b73e49479d07b2464c2c4ab190d1d16795fc781",
+      "closedAt": "2022-03-25T14:52:54Z",
+      "mergedAt": "2022-03-25T14:52:53Z",
+      "mergedBy": "bemasc",
+      "mergeCommit": {
+        "oid": "10ef4fa5511961e1cf676a489b5be24500b35966"
+      },
+      "comments": [],
+      "reviews": [
+        {
+          "id": "PRR_kwDOEO8pQ841tce_",
+          "commit": {
+            "abbreviatedOid": "8a04884"
+          },
+          "author": "chris-wood",
+          "authorAssociation": "NONE",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2022-03-06T18:16:56Z",
+          "updatedAt": "2022-03-06T18:17:00Z",
+          "comments": [
+            {
+              "originalPosition": 18,
+              "body": "```suggestion\r\n* The client is being used with a trusted DNS server.\r\n```\r\n\r\nTrusted seems binary in this context, so \"highly\" doesn't seem to add anything.",
+              "createdAt": "2022-03-06T18:16:56Z",
+              "updatedAt": "2022-03-06T18:17:00Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOEO8pQ841wQUL",
+          "commit": {
+            "abbreviatedOid": "8a04884"
+          },
+          "author": "bemasc",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2022-03-07T15:22:10Z",
+          "updatedAt": "2022-03-07T15:22:11Z",
+          "comments": [
+            {
+              "originalPosition": 18,
+              "body": "I don't think it's binary.  DNS servers have access to sensitive user data by default, among other things, so the \"level of trust\" is complex.\r\n\r\nI've changed this to\r\n\r\n> The client is being used with a DNS server that it trusts not attempt this attack.",
+              "createdAt": "2022-03-07T15:22:11Z",
+              "updatedAt": "2022-03-07T15:22:11Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOEO8pQ841wRUO",
+          "commit": {
+            "abbreviatedOid": "8a04884"
+          },
+          "author": "chris-wood",
+          "authorAssociation": "NONE",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2022-03-07T15:25:00Z",
+          "updatedAt": "2022-03-07T15:25:01Z",
+          "comments": [
+            {
+              "originalPosition": 18,
+              "body": "Well, at the end of the day, the DNS server is either trusted or not, so trying to make it non-binary seems confusing. In any case, the new text mitigates the issue. =)",
+              "createdAt": "2022-03-07T15:25:00Z",
+              "updatedAt": "2022-03-07T15:25:01Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOEO8pQ842F8Qz",
+          "commit": {
+            "abbreviatedOid": "8a04884"
+          },
+          "author": "chris-box",
+          "authorAssociation": "NONE",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2022-03-11T17:35:46Z",
+          "updatedAt": "2022-03-11T17:35:47Z",
+          "comments": [
+            {
+              "originalPosition": 8,
+              "body": "This PR is a worthwhile improvement; I'd like to see it merged. My only comment is that it might be helpful to the reader to link directly to https://fetch.spec.whatwg.org/#port-blocking. Or if that's not a stable URL, to refer to the \"Port Blocking\" section of https://fetch.spec.whatwg.org/.",
+              "createdAt": "2022-03-11T17:35:47Z",
+              "updatedAt": "2022-03-11T17:35:47Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOEO8pQ8428Obb",
+          "commit": {
+            "abbreviatedOid": "8a04884"
+          },
+          "author": "bemasc",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2022-03-25T14:52:42Z",
+          "updatedAt": "2022-03-25T14:52:43Z",
+          "comments": [
+            {
+              "originalPosition": 8,
+              "body": "Done",
+              "createdAt": "2022-03-25T14:52:43Z",
+              "updatedAt": "2022-03-25T14:52:43Z"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "number": 12,
+      "id": "PR_kwDOEO8pQ84z9t3T",
+      "title": "Editorial suggestions for WGLC",
+      "url": "https://github.com/ietf-wg-add/draft-ietf-add-svcb-dns/pull/12",
+      "state": "MERGED",
+      "author": "tfpauly",
+      "authorAssociation": "CONTRIBUTOR",
+      "assignees": [],
+      "labels": [],
+      "body": "",
+      "createdAt": "2022-03-04T16:23:53Z",
+      "updatedAt": "2022-03-07T15:23:31Z",
+      "baseRepository": "ietf-wg-add/draft-ietf-add-svcb-dns",
+      "baseRefName": "main",
+      "baseRefOid": "ca81bce35f1d56db918aa48423f8af6f940f5180",
+      "headRepository": "tfpauly/draft-ietf-add-svcb-dns",
+      "headRefName": "patch-1",
+      "headRefOid": "5543be0a5a56ec4bb165582fce8339c8f42fc0d1",
+      "closedAt": "2022-03-07T15:23:31Z",
+      "mergedAt": "2022-03-07T15:23:31Z",
+      "mergedBy": "bemasc",
+      "mergeCommit": {
+        "oid": "08963fd305973858da3d6d1d3b6a8ce391d0ca23"
+      },
+      "comments": [],
+      "reviews": [
+        {
+          "id": "PRR_kwDOEO8pQ841tcfT",
+          "commit": {
+            "abbreviatedOid": "5543be0"
+          },
+          "author": "chris-wood",
+          "authorAssociation": "NONE",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2022-03-06T18:17:11Z",
+          "updatedAt": "2022-03-06T18:17:11Z",
+          "comments": []
+        },
+        {
+          "id": "PRR_kwDOEO8pQ841wQvY",
+          "commit": {
+            "abbreviatedOid": "5543be0"
+          },
+          "author": "bemasc",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2022-03-07T15:23:24Z",
+          "updatedAt": "2022-03-07T15:23:24Z",
+          "comments": []
+        }
+      ]
+    },
+    {
+      "number": 17,
+      "id": "PR_kwDOEO8pQ841nKlM",
+      "title": "Rephrase redirection defense requirements",
+      "url": "https://github.com/ietf-wg-add/draft-ietf-add-svcb-dns/pull/17",
+      "state": "MERGED",
+      "author": "bemasc",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "Fixes #16",
+      "createdAt": "2022-04-04T20:32:36Z",
+      "updatedAt": "2022-07-07T13:24:04Z",
+      "baseRepository": "ietf-wg-add/draft-ietf-add-svcb-dns",
+      "baseRefName": "main",
+      "baseRefOid": "10ef4fa5511961e1cf676a489b5be24500b35966",
+      "headRepository": "ietf-wg-add/draft-ietf-add-svcb-dns",
+      "headRefName": "bemasc-redirect",
+      "headRefOid": "8d703eab627af1288b7acf364d92b5a10d64353b",
+      "closedAt": "2022-04-22T17:50:18Z",
+      "mergedAt": "2022-04-22T17:50:18Z",
+      "mergedBy": "bemasc",
+      "mergeCommit": {
+        "oid": "88180d2fb83075d4d8a3f5e20d4af70d920f3f24"
+      },
+      "comments": [
+        {
+          "author": "bemasc",
+          "authorAssociation": "COLLABORATOR",
+          "body": "@chris-wood Please review.",
+          "createdAt": "2022-04-04T20:32:55Z",
+          "updatedAt": "2022-04-04T20:32:55Z"
+        }
+      ],
+      "reviews": []
+    },
+    {
+      "number": 18,
+      "id": "PR_kwDOEO8pQ842o2w1",
+      "title": "Restructure \"dohpath\" normative description",
+      "url": "https://github.com/ietf-wg-add/draft-ietf-add-svcb-dns/pull/18",
+      "state": "MERGED",
+      "author": "bemasc",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "This wording avoids the complexity of a URI construction algorithm\r\nand is more direct and compact.\r\n\r\nFixes #13",
+      "createdAt": "2022-04-22T17:49:10Z",
+      "updatedAt": "2022-04-22T17:50:32Z",
+      "baseRepository": "ietf-wg-add/draft-ietf-add-svcb-dns",
+      "baseRefName": "main",
+      "baseRefOid": "10ef4fa5511961e1cf676a489b5be24500b35966",
+      "headRepository": "ietf-wg-add/draft-ietf-add-svcb-dns",
+      "headRefName": "bemasc-dohpath",
+      "headRefOid": "e0babe98737f6654789d87e8250548b025488d26",
+      "closedAt": "2022-04-22T17:50:29Z",
+      "mergedAt": "2022-04-22T17:50:28Z",
+      "mergedBy": "bemasc",
+      "mergeCommit": {
+        "oid": "3261d8456a66c95b0f178e6830c11737f6cd6461"
+      },
+      "comments": [],
+      "reviews": []
+    },
+    {
+      "number": 20,
+      "id": "PR_kwDOEO8pQ845t7M0",
+      "title": "Note that `dohpath` is always relative",
+      "url": "https://github.com/ietf-wg-add/draft-ietf-add-svcb-dns/pull/20",
+      "state": "MERGED",
+      "author": "bemasc",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "Fixes #19",
+      "createdAt": "2022-06-15T15:39:16Z",
+      "updatedAt": "2022-06-21T18:58:43Z",
+      "baseRepository": "ietf-wg-add/draft-ietf-add-svcb-dns",
+      "baseRefName": "main",
+      "baseRefOid": "77855840271530e0e43c68ae4c8f290f7c3c153b",
+      "headRepository": "ietf-wg-add/draft-ietf-add-svcb-dns",
+      "headRefName": "bemasc-relative",
+      "headRefOid": "c1dbaf2d4ead90bc4bb52b34d1539737a4cd4b54",
+      "closedAt": "2022-06-21T18:58:38Z",
+      "mergedAt": "2022-06-21T18:58:38Z",
+      "mergedBy": "bemasc",
+      "mergeCommit": {
+        "oid": "43dd4a74e6efce917ce9ea88c590ff76a16fb656"
+      },
+      "comments": [],
+      "reviews": [
+        {
+          "id": "PRR_kwDOEO8pQ848FreZ",
+          "commit": {
+            "abbreviatedOid": "c1dbaf2"
+          },
+          "author": "tfpauly",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2022-06-15T20:56:19Z",
+          "updatedAt": "2022-06-15T20:56:19Z",
+          "comments": []
+        }
+      ]
+    },
+    {
+      "number": 21,
+      "id": "PR_kwDOEO8pQ846b5GA",
+      "title": "Note some additional limitations mentioned by Viktor Dukhovni",
+      "url": "https://github.com/ietf-wg-add/draft-ietf-add-svcb-dns/pull/21",
+      "state": "MERGED",
+      "author": "bemasc",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "See https://mailarchive.ietf.org/arch/msg/add/YVa0CHXJ7fHlPFnOMgnb5DpGmrk/",
+      "createdAt": "2022-06-27T18:23:03Z",
+      "updatedAt": "2022-06-27T19:59:31Z",
+      "baseRepository": "ietf-wg-add/draft-ietf-add-svcb-dns",
+      "baseRefName": "main",
+      "baseRefOid": "37e19c9ee106009b1d2e428f80cc8658e1efb7c3",
+      "headRepository": "ietf-wg-add/draft-ietf-add-svcb-dns",
+      "headRefName": "bemasc-viktor",
+      "headRefOid": "46a6d5c106d2cde7c28e023eee607c7ca3b86a87",
+      "closedAt": "2022-06-27T19:59:25Z",
+      "mergedAt": "2022-06-27T19:59:25Z",
+      "mergedBy": "bemasc",
+      "mergeCommit": {
+        "oid": "ffe3b4620fb33e1d1b96d10149ecf2f642681aad"
+      },
+      "comments": [],
+      "reviews": [
+        {
+          "id": "PRR_kwDOEO8pQ8481mW6",
+          "commit": {
+            "abbreviatedOid": "46a6d5c"
+          },
+          "author": "vdukhovni",
+          "authorAssociation": "NONE",
+          "state": "APPROVED",
+          "body": "LGTM",
+          "createdAt": "2022-06-27T19:31:43Z",
+          "updatedAt": "2022-06-27T19:31:43Z",
+          "comments": []
+        }
+      ]
+    }
+  ]
+}
