@@ -16,7 +16,7 @@ author:
  -
     ins: B. Schwartz
     name: Benjamin Schwartz
-    organization: Google LLC
+    organization: Meta Platforms, Inc.
     email: ietf@bemasc.net
 
 normative:
